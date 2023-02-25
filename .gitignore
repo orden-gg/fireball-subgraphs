@@ -1,0 +1,12 @@
+# dependencies
+/node_modules
+
+# environments
+.env
+
+# subgraph
+subgraph/build
+subgraph/generated
+
+# misc
+.DS_Store

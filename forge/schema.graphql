@@ -1,0 +1,8 @@
+type Player @entity {
+  "player address"
+  id: ID!
+  parcels: [Parcel!]! @derivedFrom(field: "owner")
+  parcelsCount: Int!
+  installations: [Installation!]! @derivedFrom(field: "owner")
+  tiles: [Tile!]! @derivedFrom(field: "owner")
+}

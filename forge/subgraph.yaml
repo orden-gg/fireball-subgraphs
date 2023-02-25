@@ -1,0 +1,38 @@
+specVersion: 0.0.4
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: ForgeDiamond
+    network: matic
+    source:
+      address: '0x4fDfc1B53Fd1D80d969C984ba7a8CE4c7bAaD442'
+      abi: ForgeDiamond
+      startBlock: 39165012
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Player
+      abis:
+        - name: ForgeDiamond
+          file: ./abis/forge.abi.json
+      eventHandlers:
+        - event: TransferSingle(indexed address,indexed address,indexed address,uint256,uint256)
+          handler: handleTransferSingle
+        - event: TransferBatch(indexed address,indexed address,indexed address,uint256[],uint256[])
+          handler: handleTransferBatch
+        - event: ItemSmelted(uint256,uint256)
+          handler: handleItemSmelted
+        - event: ItemForged(uint256,uint256)
+          handler: handleItemForged
+        - event: ForgeQueueClaimed(uint256,uint256)
+          handler: handleForgeQueueClaimed
+        - event: ForgeTimeReduced(indexed uint256,indexed uint256,indexed uint256,uint40)
+          handler: handleForgeTimeReduced
+        - event: AddedToQueue(indexed address,indexed uint256,indexed uint256,uint40,uint256)
+          handler: handleAddedToQueue
+        - event: QueueTimeReduced(indexed uint256,uint40)
+          handler: handleQueueTimeReduced
+      file: ./src/mappings/forge.ts
