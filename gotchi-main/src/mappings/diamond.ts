@@ -59,7 +59,8 @@ import {
   loadOrCreatePortal,
   updateIdentityByGotchi,
   updateIdentityByOptions,
-  removeUnclaimedIdentity
+  removeUnclaimedIdentity,
+  removeClaimedIdentity
 } from '../helpers';
 import {
   loadOrCreateERC1155Listing,
@@ -217,6 +218,9 @@ export function handleBuyPortals(event: BuyPortals): void {
 
   const baseId = event.params._tokenId;
 
+  buyer.portalsAmount = buyer.portalsAmount - 1;
+  owner.portalsAmount = owner.portalsAmount + 1;
+
   for (let i = 0; i < event.params._numAavegotchisToPurchase.toI32(); i++) {
     const id = baseId.plus(BigInt.fromI32(i));
     const portal = loadOrCreatePortal(id);
@@ -285,6 +289,11 @@ export function handleClaimAavegotchi(event: ClaimAavegotchi): void {
   gotchi.claimedAt = event.block.number;
   gotchi.gotchiId = event.params._tokenId;
 
+  const owner = loadOrCreatePlayer(Address.fromString(gotchi.originalOwner));
+
+  owner.portalsAmount = owner.portalsAmount - 1;
+  owner.gotchisAmount = owner.gotchisAmount + 1;
+
   portal.gotchi = gotchi.id;
   const zeroUser = loadOrCreatePlayer(Address.zero());
   portal.owner = zeroUser.id;
@@ -312,6 +321,8 @@ export function handleClaimAavegotchi(event: ClaimAavegotchi): void {
   portal.openedAt = event.block.number;
   portal.save();
 
+  owner.save();
+
   gotchi.save();
   zeroUser.save();
 }
@@ -335,20 +346,40 @@ export function handleDecreaseStake(event: DecreaseStake): void {
 //   handler: handleSpendSkillpoints
 
 export function handleSpendSkillpoints(event: SpendSkillpoints): void {
+  const contract = AavegotchiDiamond.bind(event.address);
+  const _response = contract.try_availableSkillPoints(event.params._tokenId);
   let gotchi = loadOrCreateGotchi(event.params._tokenId, event)!;
   gotchi = updateGotchiInfo(gotchi, event.params._tokenId, event);
   updateAavegotchiWearables(gotchi, event);
+
+  if (!_response.reverted) {
+    const gotchi = loadOrCreateGotchi(event.params._tokenId, event)!;
+
+    gotchi.availableSkillPoints = _response.value;
+
+    gotchi.save();
+  }
 }
 
 export function handleTransfer(event: Transfer): void {
   const id = event.params._tokenId;
+  const oldOwner = loadOrCreatePlayer(event.params._from);
   const newOwner = loadOrCreatePlayer(event.params._to);
-  newOwner.save();
   const portal = loadOrCreatePortal(id, false);
   let gotchi = loadOrCreateGotchi(id, event, false);
 
   // ERC721 transfer can be portal or gotchi based, so we have to check it.
   if (gotchi != null) {
+    const isSucrefied = event.params._to === Address.zero();
+
+    if (isSucrefied) {
+      log.warning('Sucrefied gotchi {}', [gotchi.id]);
+      const identity = removeClaimedIdentity(gotchi.id, event);
+
+      if (identity) {
+        identity.save();
+      }
+    }
     if (!gotchi.modifiedRarityScore) {
       gotchi = updateGotchiInfo(gotchi, event.params._tokenId, event);
     }
@@ -357,10 +388,19 @@ export function handleTransfer(event: Transfer): void {
       gotchi.originalOwner = newOwner.id;
     }
     gotchi.save();
+
+    oldOwner.gotchisAmount = oldOwner.gotchisAmount - 1;
+    newOwner.gotchisAmount = newOwner.gotchisAmount + 1;
   } else {
     portal.owner = newOwner.id;
     portal.save();
+
+    oldOwner.portalsAmount = oldOwner.portalsAmount - 1;
+    newOwner.portalsAmount = newOwner.portalsAmount + 1;
   }
+
+  oldOwner.save();
+  newOwner.save();
 }
 
 export function handleGotchiLendingAdd(event: GotchiLendingAdd): void {
@@ -779,11 +819,11 @@ export function handleTransferSingle(event: TransferSingle): void {
   const contract = AavegotchiDiamond.bind(event.address);
   const _itemType = contract.getItemType(event.params._id);
 
-  const playerOne = loadOrCreatePlayer(event.params._from);
-  const playerTwo = loadOrCreatePlayer(event.params._to);
+  const oldOwner = loadOrCreatePlayer(event.params._from);
+  const newOwner = loadOrCreatePlayer(event.params._to);
 
-  playerOne.save();
-  playerTwo.save();
+  oldOwner.itemsAmount = oldOwner.itemsAmount - 1;
+  newOwner.itemsAmount = newOwner.itemsAmount + 1;
 
   if (_itemType.category == ERC1155ItemCategoty.Badge) {
     log.warning('BADGE {}', [event.params._id.toString()]);
@@ -799,15 +839,16 @@ export function handleTransferSingle(event: TransferSingle): void {
     wearableFrom.save();
     wearableTo.save();
   }
+
+  oldOwner.save();
+  newOwner.save();
 }
 
 export function handleTransferBatch(event: TransferBatch): void {
   const contract = AavegotchiDiamond.bind(event.address);
-  const playerOne = loadOrCreatePlayer(event.params._from);
-  const playerTwo = loadOrCreatePlayer(event.params._to);
-
-  playerOne.save();
-  playerTwo.save();
+  const oldOwner = loadOrCreatePlayer(event.params._from);
+  const newOwner = loadOrCreatePlayer(event.params._to);
+  let transferedAmount = 0;
 
   for (let i = 0; i < event.params._ids.length; i++) {
     const _itemType = contract.getItemType(event.params._ids[i]);
@@ -822,10 +863,18 @@ export function handleTransferBatch(event: TransferBatch): void {
       wearableFrom.amount = wearableFrom.amount - amount;
       wearableTo.amount = wearableTo.amount + amount;
 
+      transferedAmount = transferedAmount + amount;
+
       wearableFrom.save();
       wearableTo.save();
     }
   }
+
+  oldOwner.itemsAmount = oldOwner.itemsAmount - transferedAmount;
+  newOwner.itemsAmount = newOwner.itemsAmount + transferedAmount;
+
+  oldOwner.save();
+  newOwner.save();
 }
 
 export function handleTransferFromParent(event: TransferFromParent): void {
@@ -834,10 +883,14 @@ export function handleTransferFromParent(event: TransferFromParent): void {
   const _itemType = contract.getItemType(event.params._tokenTypeId);
 
   if (gotchi) {
+    const owner = loadOrCreatePlayer(Address.fromString(gotchi.originalOwner));
     const item = loadOrCreateItem(event.params._tokenTypeId, Address.fromString(gotchi.originalOwner), _itemType);
 
     item.equipped = item.equipped - event.params._value.toI32();
 
+    owner.itemsAmount = owner.itemsAmount + 1;
+
+    owner.save();
     item.save();
   }
 }
@@ -862,9 +915,12 @@ export function handleTransferToParent(event: TransferToParent): void {
         event.params._toTokenId.toString()
       ]);
     } else {
+      const owner = loadOrCreatePlayer(Address.fromString(gotchi.originalOwner));
       const item = loadOrCreateItem(event.params._tokenTypeId, Address.fromString(gotchi.originalOwner), _itemType);
 
       item.equipped = item.equipped + event.params._value.toI32();
+
+      owner.itemsAmount = owner.itemsAmount + 1;
 
       item.save();
     }

@@ -20,6 +20,7 @@ export const loadOrCreateGotchi = (
     gotchi.historicalPrices = [];
     gotchi.badges = [];
     gotchi.originalOwner = Address.zero().toHexString();
+    gotchi.availableSkillPoints = BigInt.zero();
   } else if (gotchi == null && !createIfNotFound) {
     return null;
   }
@@ -297,7 +298,7 @@ export function updateGotchiLending(lending: GotchiLending, event: ethereum.Even
   lending.gotchiBRS = gotchi.withSetsRarityScore;
   lending.gotchiKinship = gotchiResult.kinship;
 
-  lending.tokensToShare = listingResult.revenueTokens.map<Bytes>(e => e);
+  lending.tokensToShare = listingResult.revenueTokens.map<Bytes>((e) => e);
   lending.upfrontCost = listingResult.initialCost;
 
   lending.lastClaimed = listingResult.lastClaimed;
@@ -351,7 +352,7 @@ export function loadOrCreateWhitelist(id: BigInt, event: ethereum.Event): Whitel
   user.save();
   whitelist.owner = user.id;
   whitelist.ownerAddress = result.owner;
-  whitelist.members = members.map<Bytes>(e => e);
+  whitelist.members = members.map<Bytes>((e) => e);
 
   whitelist.save();
   return whitelist;

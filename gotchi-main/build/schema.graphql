@@ -9,6 +9,10 @@ type Player @entity {
   portalsOwned: [Portal!]! @derivedFrom(field: "owner")
   gotchisLentOut: [BigInt!]!
   gotchisBorrowed: [BigInt!]!
+
+  gotchisAmount: Int!
+  portalsAmount: Int!
+  itemsAmount: Int!
 }
 
 type AavegotchiOption @entity {
@@ -53,6 +57,7 @@ type Gotchi @entity {
   experience: BigInt!
   toNextLevel: BigInt!
   usedSkillPoints: BigInt!
+  availableSkillPoints: BigInt!
   level: BigInt!
   baseRarityScore: BigInt!
   modifiedRarityScore: BigInt!

@@ -1,4 +1,4 @@
-import { Bytes, log } from '@graphprotocol/graph-ts';
+import { BigInt, Bytes, ethereum, log } from '@graphprotocol/graph-ts';
 import { AavegotchiOption, Gotchi, Identity } from '../../generated/schema';
 import {
   ColorCommon,
@@ -28,7 +28,7 @@ import {
   ShapeUncommonLow3,
   TraitsNumberTypes
 } from '../shared';
-import { loadOrCreateGotchiOption } from './gotchi.helper';
+import { loadOrCreateGotchi, loadOrCreateGotchiOption } from './gotchi.helper';
 
 export function loadOrCreateIdentity(id: string): Identity {
   let identity = Identity.load(id);
@@ -59,6 +59,33 @@ export function updateIdentityByGotchi(gotchi: Gotchi): Identity {
   identity.claimedAmount = identityClaimed.length;
 
   return identity;
+}
+// @ts-ignore
+export function removeClaimedIdentity(gotchiId: string, event: ethereum.Event): Identity | null {
+  const claimedGotchi = loadOrCreateGotchi(BigInt.fromString(gotchiId), event);
+
+  if (claimedGotchi) {
+    const identity = loadOrCreateIdentity(claimedGotchi.identity);
+    const clamedIdentities: string[] = new Array<string>();
+
+    for (let i = 0; i < identity.unclaimed.length; i++) {
+      const claimedGotchiId: string = identity.unclaimed[i];
+
+      if (claimedGotchiId != claimedGotchi.id) {
+        clamedIdentities.push(claimedGotchiId);
+      } else {
+        log.warning('remove claimed gotchi {}, {}', [claimedGotchiId, claimedGotchi.id]);
+      }
+    }
+
+    identity.claimed = clamedIdentities;
+
+    identity.claimedAmount = clamedIdentities.length;
+
+    return identity;
+  } else {
+    return null;
+  }
 }
 
 export function updateIdentityByOptions(unclaimedGotchi: AavegotchiOption): Identity {

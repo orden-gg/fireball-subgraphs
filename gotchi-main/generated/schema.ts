@@ -570,6 +570,15 @@ export class Gotchi extends Entity {
     this.set("usedSkillPoints", Value.fromBigInt(value));
   }
 
+  get availableSkillPoints(): BigInt {
+    let value = this.get("availableSkillPoints");
+    return value!.toBigInt();
+  }
+
+  set availableSkillPoints(value: BigInt) {
+    this.set("availableSkillPoints", Value.fromBigInt(value));
+  }
+
   get level(): BigInt {
     let value = this.get("level");
     return value!.toBigInt();

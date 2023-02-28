@@ -57,6 +57,7 @@ type Gotchi @entity {
   experience: BigInt!
   toNextLevel: BigInt!
   usedSkillPoints: BigInt!
+  availableSkillPoints: BigInt!
   level: BigInt!
   baseRarityScore: BigInt!
   modifiedRarityScore: BigInt!
