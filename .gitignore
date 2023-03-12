@@ -5,8 +5,8 @@
 .env
 
 # subgraph
-subgraph/build
-subgraph/generated
+**/build
+**/generated
 
 # misc
 .DS_Store

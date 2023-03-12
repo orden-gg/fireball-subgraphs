@@ -17,22 +17,22 @@ dataSources:
         - Player
       abis:
         - name: ForgeDiamond
-          file: ./abis/forge.abi.json
+          file: ../abis/forge.abi.json
       eventHandlers:
-        - event: TransferSingle(indexed address,indexed address,indexed address,uint256,uint256)
-          handler: handleTransferSingle
-        - event: TransferBatch(indexed address,indexed address,indexed address,uint256[],uint256[])
-          handler: handleTransferBatch
+        # - event: TransferSingle(indexed address,indexed address,indexed address,uint256,uint256)
+        #   handler: handleTransferSingle
+        # - event: TransferBatch(indexed address,indexed address,indexed address,uint256[],uint256[])
+        #   handler: handleTransferBatch
         - event: ItemSmelted(uint256,uint256)
           handler: handleItemSmelted
-        - event: ItemForged(uint256,uint256)
-          handler: handleItemForged
-        - event: ForgeQueueClaimed(uint256,uint256)
-          handler: handleForgeQueueClaimed
-        - event: ForgeTimeReduced(indexed uint256,indexed uint256,indexed uint256,uint40)
-          handler: handleForgeTimeReduced
-        - event: AddedToQueue(indexed address,indexed uint256,indexed uint256,uint40,uint256)
-          handler: handleAddedToQueue
-        - event: QueueTimeReduced(indexed uint256,uint40)
-          handler: handleQueueTimeReduced
+        # - event: ItemForged(uint256,uint256)
+        #   handler: handleItemForged
+        # - event: ForgeQueueClaimed(uint256,uint256)
+        #   handler: handleForgeQueueClaimed
+        # - event: ForgeTimeReduced(indexed uint256,indexed uint256,indexed uint256,uint40)
+        #   handler: handleForgeTimeReduced
+        # - event: AddedToQueue(indexed address,indexed uint256,indexed uint256,uint40,uint256)
+        #   handler: handleAddedToQueue
+        # - event: QueueTimeReduced(indexed uint256,uint40)
+        #   handler: handleQueueTimeReduced
       file: ./src/mappings/forge.ts

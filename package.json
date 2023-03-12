@@ -23,6 +23,8 @@
     "subgraph:deploy:main:prod": "cd gotchi-main && graph deploy --product hosted-service orden-gg/main",
     "subgraph:codegen:verse": "graph codegen gotchiverse/subgraph.yaml -o gotchiverse/generated",
     "subgraph:deploy:verse:stage": "cd subgraph && graph deploy --node https://api.thegraph.com/deploy/ dudendy/gotchiverse",
-    "subgraph:deploy:verse:prod": "cd subgraph && graph deploy --node https://api.thegraph.com/deploy/ orden-gg/gotchiverse"
+    "subgraph:deploy:verse:prod": "cd subgraph && graph deploy --node https://api.thegraph.com/deploy/ orden-gg/gotchiverse",
+    "subgraph:codegen:forge": "graph codegen forge/subgraph.yaml -o forge/generated",
+    "subgraph:deploy:forge:stage": "cd forge && graph deploy --node https://api.thegraph.com/deploy/ dudendy/forge"
   }
 }
