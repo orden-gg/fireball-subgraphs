@@ -17,7 +17,7 @@ dataSources:
         - User
       abis:
         - name: AavegotchiDiamond
-          file: ./abis/diamond.abi.json
+          file: ../abis/diamond.abi.json
       eventHandlers:
         - event: BuyPortals(indexed address,indexed address,uint256,uint256,uint256)
           handler: handleBuyPortals
