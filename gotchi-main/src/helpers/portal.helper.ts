@@ -6,8 +6,6 @@ export function loadOrCreatePortal(id: BigInt, createIfNotFound: boolean = true)
 
   if (portal == null && createIfNotFound) {
     portal = new Portal(id.toString());
-    portal.timesTraded = BigInt.zero();
-    portal.historicalPrices = [];
     portal.hauntId = BigInt.zero();
   }
 

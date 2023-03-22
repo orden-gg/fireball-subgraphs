@@ -42,23 +42,6 @@ export class Player extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get items(): Array<string> | null {
-    let value = this.get("items");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toStringArray();
-    }
-  }
-
-  set items(value: Array<string> | null) {
-    if (!value) {
-      this.unset("items");
-    } else {
-      this.set("items", Value.fromStringArray(<Array<string>>value));
-    }
-  }
-
   get portalsBought(): Array<string> {
     let value = this.get("portalsBought");
     return value!.toStringArray();
@@ -66,6 +49,24 @@ export class Player extends Entity {
 
   set portalsBought(value: Array<string>) {
     this.set("portalsBought", Value.fromStringArray(value));
+  }
+
+  get portalsOwned(): Array<string> {
+    let value = this.get("portalsOwned");
+    return value!.toStringArray();
+  }
+
+  set portalsOwned(value: Array<string>) {
+    this.set("portalsOwned", Value.fromStringArray(value));
+  }
+
+  get portalsAmount(): i32 {
+    let value = this.get("portalsAmount");
+    return value!.toI32();
+  }
+
+  set portalsAmount(value: i32) {
+    this.set("portalsAmount", Value.fromI32(value));
   }
 
   get gotchisOwned(): Array<string> {
@@ -86,13 +87,13 @@ export class Player extends Entity {
     this.set("gotchisOriginalOwned", Value.fromStringArray(value));
   }
 
-  get portalsOwned(): Array<string> {
-    let value = this.get("portalsOwned");
-    return value!.toStringArray();
+  get gotchisAmount(): i32 {
+    let value = this.get("gotchisAmount");
+    return value!.toI32();
   }
 
-  set portalsOwned(value: Array<string>) {
-    this.set("portalsOwned", Value.fromStringArray(value));
+  set gotchisAmount(value: i32) {
+    this.set("gotchisAmount", Value.fromI32(value));
   }
 
   get gotchisLentOut(): Array<BigInt> {
@@ -104,6 +105,15 @@ export class Player extends Entity {
     this.set("gotchisLentOut", Value.fromBigIntArray(value));
   }
 
+  get gotchisLentOutAmount(): i32 {
+    let value = this.get("gotchisLentOutAmount");
+    return value!.toI32();
+  }
+
+  set gotchisLentOutAmount(value: i32) {
+    this.set("gotchisLentOutAmount", Value.fromI32(value));
+  }
+
   get gotchisBorrowed(): Array<BigInt> {
     let value = this.get("gotchisBorrowed");
     return value!.toBigIntArray();
@@ -113,22 +123,30 @@ export class Player extends Entity {
     this.set("gotchisBorrowed", Value.fromBigIntArray(value));
   }
 
-  get gotchisAmount(): i32 {
-    let value = this.get("gotchisAmount");
+  get gotchisBorrowedAmount(): i32 {
+    let value = this.get("gotchisBorrowedAmount");
     return value!.toI32();
   }
 
-  set gotchisAmount(value: i32) {
-    this.set("gotchisAmount", Value.fromI32(value));
+  set gotchisBorrowedAmount(value: i32) {
+    this.set("gotchisBorrowedAmount", Value.fromI32(value));
   }
 
-  get portalsAmount(): i32 {
-    let value = this.get("portalsAmount");
-    return value!.toI32();
+  get items(): Array<string> | null {
+    let value = this.get("items");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toStringArray();
+    }
   }
 
-  set portalsAmount(value: i32) {
-    this.set("portalsAmount", Value.fromI32(value));
+  set items(value: Array<string> | null) {
+    if (!value) {
+      this.unset("items");
+    } else {
+      this.set("items", Value.fromStringArray(<Array<string>>value));
+    }
   }
 
   get itemsAmount(): i32 {
@@ -245,33 +263,6 @@ export class AavegotchiOption extends Entity {
     this.set("numericTraits", Value.fromI32Array(value));
   }
 
-  get collateralType(): Bytes {
-    let value = this.get("collateralType");
-    return value!.toBytes();
-  }
-
-  set collateralType(value: Bytes) {
-    this.set("collateralType", Value.fromBytes(value));
-  }
-
-  get minimumStake(): BigInt {
-    let value = this.get("minimumStake");
-    return value!.toBigInt();
-  }
-
-  set minimumStake(value: BigInt) {
-    this.set("minimumStake", Value.fromBigInt(value));
-  }
-
-  get baseRarityScore(): i32 {
-    let value = this.get("baseRarityScore");
-    return value!.toI32();
-  }
-
-  set baseRarityScore(value: i32) {
-    this.set("baseRarityScore", Value.fromI32(value));
-  }
-
   get identity(): string {
     let value = this.get("identity");
     return value!.toString();
@@ -279,6 +270,15 @@ export class AavegotchiOption extends Entity {
 
   set identity(value: string) {
     this.set("identity", Value.fromString(value));
+  }
+
+  get collateralType(): Bytes {
+    let value = this.get("collateralType");
+    return value!.toBytes();
+  }
+
+  set collateralType(value: Bytes) {
+    this.set("collateralType", Value.fromBytes(value));
   }
 }
 
@@ -322,22 +322,38 @@ export class Gotchi extends Entity {
     this.set("gotchiId", Value.fromBigInt(value));
   }
 
-  get owner(): string {
+  get owner(): string | null {
     let value = this.get("owner");
-    return value!.toString();
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toString();
+    }
   }
 
-  set owner(value: string) {
-    this.set("owner", Value.fromString(value));
+  set owner(value: string | null) {
+    if (!value) {
+      this.unset("owner");
+    } else {
+      this.set("owner", Value.fromString(<string>value));
+    }
   }
 
-  get originalOwner(): string {
+  get originalOwner(): string | null {
     let value = this.get("originalOwner");
-    return value!.toString();
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toString();
+    }
   }
 
-  set originalOwner(value: string) {
-    this.set("originalOwner", Value.fromString(value));
+  set originalOwner(value: string | null) {
+    if (!value) {
+      this.unset("originalOwner");
+    } else {
+      this.set("originalOwner", Value.fromString(<string>value));
+    }
   }
 
   get portal(): string {
@@ -347,218 +363,6 @@ export class Gotchi extends Entity {
 
   set portal(value: string) {
     this.set("portal", Value.fromString(value));
-  }
-
-  get hauntId(): BigInt {
-    let value = this.get("hauntId");
-    return value!.toBigInt();
-  }
-
-  set hauntId(value: BigInt) {
-    this.set("hauntId", Value.fromBigInt(value));
-  }
-
-  get name(): string {
-    let value = this.get("name");
-    return value!.toString();
-  }
-
-  set name(value: string) {
-    this.set("name", Value.fromString(value));
-  }
-
-  get nameLowerCase(): string {
-    let value = this.get("nameLowerCase");
-    return value!.toString();
-  }
-
-  set nameLowerCase(value: string) {
-    this.set("nameLowerCase", Value.fromString(value));
-  }
-
-  get randomNumber(): BigInt {
-    let value = this.get("randomNumber");
-    return value!.toBigInt();
-  }
-
-  set randomNumber(value: BigInt) {
-    this.set("randomNumber", Value.fromBigInt(value));
-  }
-
-  get status(): BigInt {
-    let value = this.get("status");
-    return value!.toBigInt();
-  }
-
-  set status(value: BigInt) {
-    this.set("status", Value.fromBigInt(value));
-  }
-
-  get numericTraits(): Array<i32> {
-    let value = this.get("numericTraits");
-    return value!.toI32Array();
-  }
-
-  set numericTraits(value: Array<i32>) {
-    this.set("numericTraits", Value.fromI32Array(value));
-  }
-
-  get modifiedNumericTraits(): Array<i32> {
-    let value = this.get("modifiedNumericTraits");
-    return value!.toI32Array();
-  }
-
-  set modifiedNumericTraits(value: Array<i32>) {
-    this.set("modifiedNumericTraits", Value.fromI32Array(value));
-  }
-
-  get withSetsNumericTraits(): Array<i32> | null {
-    let value = this.get("withSetsNumericTraits");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toI32Array();
-    }
-  }
-
-  set withSetsNumericTraits(value: Array<i32> | null) {
-    if (!value) {
-      this.unset("withSetsNumericTraits");
-    } else {
-      this.set("withSetsNumericTraits", Value.fromI32Array(<Array<i32>>value));
-    }
-  }
-
-  get equippedWearables(): Array<i32> {
-    let value = this.get("equippedWearables");
-    return value!.toI32Array();
-  }
-
-  set equippedWearables(value: Array<i32>) {
-    this.set("equippedWearables", Value.fromI32Array(value));
-  }
-
-  get equippedSetID(): BigInt | null {
-    let value = this.get("equippedSetID");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set equippedSetID(value: BigInt | null) {
-    if (!value) {
-      this.unset("equippedSetID");
-    } else {
-      this.set("equippedSetID", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get equippedSetName(): string | null {
-    let value = this.get("equippedSetName");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toString();
-    }
-  }
-
-  set equippedSetName(value: string | null) {
-    if (!value) {
-      this.unset("equippedSetName");
-    } else {
-      this.set("equippedSetName", Value.fromString(<string>value));
-    }
-  }
-
-  get possibleSets(): BigInt | null {
-    let value = this.get("possibleSets");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set possibleSets(value: BigInt | null) {
-    if (!value) {
-      this.unset("possibleSets");
-    } else {
-      this.set("possibleSets", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get collateral(): Bytes {
-    let value = this.get("collateral");
-    return value!.toBytes();
-  }
-
-  set collateral(value: Bytes) {
-    this.set("collateral", Value.fromBytes(value));
-  }
-
-  get escrow(): Bytes {
-    let value = this.get("escrow");
-    return value!.toBytes();
-  }
-
-  set escrow(value: Bytes) {
-    this.set("escrow", Value.fromBytes(value));
-  }
-
-  get stakedAmount(): BigInt {
-    let value = this.get("stakedAmount");
-    return value!.toBigInt();
-  }
-
-  set stakedAmount(value: BigInt) {
-    this.set("stakedAmount", Value.fromBigInt(value));
-  }
-
-  get minimumStake(): BigInt {
-    let value = this.get("minimumStake");
-    return value!.toBigInt();
-  }
-
-  set minimumStake(value: BigInt) {
-    this.set("minimumStake", Value.fromBigInt(value));
-  }
-
-  get kinship(): BigInt {
-    let value = this.get("kinship");
-    return value!.toBigInt();
-  }
-
-  set kinship(value: BigInt) {
-    this.set("kinship", Value.fromBigInt(value));
-  }
-
-  get lastInteracted(): BigInt {
-    let value = this.get("lastInteracted");
-    return value!.toBigInt();
-  }
-
-  set lastInteracted(value: BigInt) {
-    this.set("lastInteracted", Value.fromBigInt(value));
-  }
-
-  get experience(): BigInt {
-    let value = this.get("experience");
-    return value!.toBigInt();
-  }
-
-  set experience(value: BigInt) {
-    this.set("experience", Value.fromBigInt(value));
-  }
-
-  get toNextLevel(): BigInt {
-    let value = this.get("toNextLevel");
-    return value!.toBigInt();
-  }
-
-  set toNextLevel(value: BigInt) {
-    this.set("toNextLevel", Value.fromBigInt(value));
   }
 
   get usedSkillPoints(): BigInt {
@@ -579,143 +383,49 @@ export class Gotchi extends Entity {
     this.set("availableSkillPoints", Value.fromBigInt(value));
   }
 
-  get level(): BigInt {
-    let value = this.get("level");
+  get badges(): Array<i32> {
+    let value = this.get("badges");
+    return value!.toI32Array();
+  }
+
+  set badges(value: Array<i32>) {
+    this.set("badges", Value.fromI32Array(value));
+  }
+
+  get collateral(): Bytes {
+    let value = this.get("collateral");
+    return value!.toBytes();
+  }
+
+  set collateral(value: Bytes) {
+    this.set("collateral", Value.fromBytes(value));
+  }
+
+  get numericTraits(): Array<i32> {
+    let value = this.get("numericTraits");
+    return value!.toI32Array();
+  }
+
+  set numericTraits(value: Array<i32>) {
+    this.set("numericTraits", Value.fromI32Array(value));
+  }
+
+  get hauntId(): BigInt {
+    let value = this.get("hauntId");
     return value!.toBigInt();
   }
 
-  set level(value: BigInt) {
-    this.set("level", Value.fromBigInt(value));
+  set hauntId(value: BigInt) {
+    this.set("hauntId", Value.fromBigInt(value));
   }
 
-  get baseRarityScore(): BigInt {
-    let value = this.get("baseRarityScore");
-    return value!.toBigInt();
+  get identity(): string {
+    let value = this.get("identity");
+    return value!.toString();
   }
 
-  set baseRarityScore(value: BigInt) {
-    this.set("baseRarityScore", Value.fromBigInt(value));
-  }
-
-  get modifiedRarityScore(): BigInt {
-    let value = this.get("modifiedRarityScore");
-    return value!.toBigInt();
-  }
-
-  set modifiedRarityScore(value: BigInt) {
-    this.set("modifiedRarityScore", Value.fromBigInt(value));
-  }
-
-  get withSetsRarityScore(): BigInt | null {
-    let value = this.get("withSetsRarityScore");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set withSetsRarityScore(value: BigInt | null) {
-    if (!value) {
-      this.unset("withSetsRarityScore");
-    } else {
-      this.set("withSetsRarityScore", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get locked(): boolean {
-    let value = this.get("locked");
-    return value!.toBoolean();
-  }
-
-  set locked(value: boolean) {
-    this.set("locked", Value.fromBoolean(value));
-  }
-
-  get listings(): Array<string> {
-    let value = this.get("listings");
-    return value!.toStringArray();
-  }
-
-  set listings(value: Array<string>) {
-    this.set("listings", Value.fromStringArray(value));
-  }
-
-  get createdAt(): BigInt | null {
-    let value = this.get("createdAt");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set createdAt(value: BigInt | null) {
-    if (!value) {
-      this.unset("createdAt");
-    } else {
-      this.set("createdAt", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get claimedAt(): BigInt | null {
-    let value = this.get("claimedAt");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set claimedAt(value: BigInt | null) {
-    if (!value) {
-      this.unset("claimedAt");
-    } else {
-      this.set("claimedAt", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get timesTraded(): BigInt {
-    let value = this.get("timesTraded");
-    return value!.toBigInt();
-  }
-
-  set timesTraded(value: BigInt) {
-    this.set("timesTraded", Value.fromBigInt(value));
-  }
-
-  get historicalPrices(): Array<BigInt> | null {
-    let value = this.get("historicalPrices");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigIntArray();
-    }
-  }
-
-  set historicalPrices(value: Array<BigInt> | null) {
-    if (!value) {
-      this.unset("historicalPrices");
-    } else {
-      this.set("historicalPrices", Value.fromBigIntArray(<Array<BigInt>>value));
-    }
-  }
-
-  get activeListing(): BigInt | null {
-    let value = this.get("activeListing");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set activeListing(value: BigInt | null) {
-    if (!value) {
-      this.unset("activeListing");
-    } else {
-      this.set("activeListing", Value.fromBigInt(<BigInt>value));
-    }
+  set identity(value: string) {
+    this.set("identity", Value.fromString(value));
   }
 
   get lending(): BigInt | null {
@@ -735,22 +445,13 @@ export class Gotchi extends Entity {
     }
   }
 
-  get badges(): Array<i32> {
-    let value = this.get("badges");
-    return value!.toI32Array();
+  get modifiedRarityScore(): BigInt {
+    let value = this.get("modifiedRarityScore");
+    return value!.toBigInt();
   }
 
-  set badges(value: Array<i32>) {
-    this.set("badges", Value.fromI32Array(value));
-  }
-
-  get identity(): string {
-    let value = this.get("identity");
-    return value!.toString();
-  }
-
-  set identity(value: string) {
-    this.set("identity", Value.fromString(value));
+  set modifiedRarityScore(value: BigInt) {
+    this.set("modifiedRarityScore", Value.fromBigInt(value));
   }
 }
 
@@ -846,511 +547,6 @@ export class Identity extends Entity {
 
   set unclaimedAmount(value: i32) {
     this.set("unclaimedAmount", Value.fromI32(value));
-  }
-}
-
-export class GotchiLending extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(id != null, "Cannot save GotchiLending entity without an ID");
-    if (id) {
-      assert(
-        id.kind == ValueKind.STRING,
-        `Entities of type GotchiLending must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
-      );
-      store.set("GotchiLending", id.toString(), this);
-    }
-  }
-
-  static load(id: string): GotchiLending | null {
-    return changetype<GotchiLending | null>(store.get("GotchiLending", id));
-  }
-
-  get id(): string {
-    let value = this.get("id");
-    return value!.toString();
-  }
-
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
-  }
-
-  get rentDuration(): BigInt {
-    let value = this.get("rentDuration");
-    return value!.toBigInt();
-  }
-
-  set rentDuration(value: BigInt) {
-    this.set("rentDuration", Value.fromBigInt(value));
-  }
-
-  get upfrontCost(): BigInt {
-    let value = this.get("upfrontCost");
-    return value!.toBigInt();
-  }
-
-  set upfrontCost(value: BigInt) {
-    this.set("upfrontCost", Value.fromBigInt(value));
-  }
-
-  get period(): BigInt {
-    let value = this.get("period");
-    return value!.toBigInt();
-  }
-
-  set period(value: BigInt) {
-    this.set("period", Value.fromBigInt(value));
-  }
-
-  get gotchi(): string {
-    let value = this.get("gotchi");
-    return value!.toString();
-  }
-
-  set gotchi(value: string) {
-    this.set("gotchi", Value.fromString(value));
-  }
-
-  get gotchiBRS(): BigInt | null {
-    let value = this.get("gotchiBRS");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set gotchiBRS(value: BigInt | null) {
-    if (!value) {
-      this.unset("gotchiBRS");
-    } else {
-      this.set("gotchiBRS", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get gotchiTokenId(): BigInt {
-    let value = this.get("gotchiTokenId");
-    return value!.toBigInt();
-  }
-
-  set gotchiTokenId(value: BigInt) {
-    this.set("gotchiTokenId", Value.fromBigInt(value));
-  }
-
-  get gotchiKinship(): BigInt {
-    let value = this.get("gotchiKinship");
-    return value!.toBigInt();
-  }
-
-  set gotchiKinship(value: BigInt) {
-    this.set("gotchiKinship", Value.fromBigInt(value));
-  }
-
-  get splitOwner(): BigInt | null {
-    let value = this.get("splitOwner");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set splitOwner(value: BigInt | null) {
-    if (!value) {
-      this.unset("splitOwner");
-    } else {
-      this.set("splitOwner", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get splitBorrower(): BigInt | null {
-    let value = this.get("splitBorrower");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set splitBorrower(value: BigInt | null) {
-    if (!value) {
-      this.unset("splitBorrower");
-    } else {
-      this.set("splitBorrower", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get splitOther(): BigInt | null {
-    let value = this.get("splitOther");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set splitOther(value: BigInt | null) {
-    if (!value) {
-      this.unset("splitOther");
-    } else {
-      this.set("splitOther", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get tokensToShare(): Array<Bytes> {
-    let value = this.get("tokensToShare");
-    return value!.toBytesArray();
-  }
-
-  set tokensToShare(value: Array<Bytes>) {
-    this.set("tokensToShare", Value.fromBytesArray(value));
-  }
-
-  get whitelist(): string | null {
-    let value = this.get("whitelist");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toString();
-    }
-  }
-
-  set whitelist(value: string | null) {
-    if (!value) {
-      this.unset("whitelist");
-    } else {
-      this.set("whitelist", Value.fromString(<string>value));
-    }
-  }
-
-  get whitelistMembers(): Array<Bytes> {
-    let value = this.get("whitelistMembers");
-    return value!.toBytesArray();
-  }
-
-  set whitelistMembers(value: Array<Bytes>) {
-    this.set("whitelistMembers", Value.fromBytesArray(value));
-  }
-
-  get whitelistId(): BigInt | null {
-    let value = this.get("whitelistId");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set whitelistId(value: BigInt | null) {
-    if (!value) {
-      this.unset("whitelistId");
-    } else {
-      this.set("whitelistId", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get thirdPartyAddress(): Bytes | null {
-    let value = this.get("thirdPartyAddress");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBytes();
-    }
-  }
-
-  set thirdPartyAddress(value: Bytes | null) {
-    if (!value) {
-      this.unset("thirdPartyAddress");
-    } else {
-      this.set("thirdPartyAddress", Value.fromBytes(<Bytes>value));
-    }
-  }
-
-  get borrower(): Bytes | null {
-    let value = this.get("borrower");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBytes();
-    }
-  }
-
-  set borrower(value: Bytes | null) {
-    if (!value) {
-      this.unset("borrower");
-    } else {
-      this.set("borrower", Value.fromBytes(<Bytes>value));
-    }
-  }
-
-  get lender(): Bytes | null {
-    let value = this.get("lender");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBytes();
-    }
-  }
-
-  set lender(value: Bytes | null) {
-    if (!value) {
-      this.unset("lender");
-    } else {
-      this.set("lender", Value.fromBytes(<Bytes>value));
-    }
-  }
-
-  get originalOwner(): Bytes | null {
-    let value = this.get("originalOwner");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBytes();
-    }
-  }
-
-  set originalOwner(value: Bytes | null) {
-    if (!value) {
-      this.unset("originalOwner");
-    } else {
-      this.set("originalOwner", Value.fromBytes(<Bytes>value));
-    }
-  }
-
-  get cancelled(): boolean {
-    let value = this.get("cancelled");
-    return value!.toBoolean();
-  }
-
-  set cancelled(value: boolean) {
-    this.set("cancelled", Value.fromBoolean(value));
-  }
-
-  get completed(): boolean {
-    let value = this.get("completed");
-    return value!.toBoolean();
-  }
-
-  set completed(value: boolean) {
-    this.set("completed", Value.fromBoolean(value));
-  }
-
-  get lastClaimed(): BigInt | null {
-    let value = this.get("lastClaimed");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set lastClaimed(value: BigInt | null) {
-    if (!value) {
-      this.unset("lastClaimed");
-    } else {
-      this.set("lastClaimed", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get timeAgreed(): BigInt | null {
-    let value = this.get("timeAgreed");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set timeAgreed(value: BigInt | null) {
-    if (!value) {
-      this.unset("timeAgreed");
-    } else {
-      this.set("timeAgreed", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get timeCreated(): BigInt | null {
-    let value = this.get("timeCreated");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set timeCreated(value: BigInt | null) {
-    if (!value) {
-      this.unset("timeCreated");
-    } else {
-      this.set("timeCreated", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get timeEnded(): BigInt | null {
-    let value = this.get("timeEnded");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set timeEnded(value: BigInt | null) {
-    if (!value) {
-      this.unset("timeEnded");
-    } else {
-      this.set("timeEnded", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get claimed(): Array<string> {
-    let value = this.get("claimed");
-    return value!.toStringArray();
-  }
-
-  set claimed(value: Array<string>) {
-    this.set("claimed", Value.fromStringArray(value));
-  }
-}
-
-export class ClaimedToken extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(id != null, "Cannot save ClaimedToken entity without an ID");
-    if (id) {
-      assert(
-        id.kind == ValueKind.STRING,
-        `Entities of type ClaimedToken must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
-      );
-      store.set("ClaimedToken", id.toString(), this);
-    }
-  }
-
-  static load(id: string): ClaimedToken | null {
-    return changetype<ClaimedToken | null>(store.get("ClaimedToken", id));
-  }
-
-  get id(): string {
-    let value = this.get("id");
-    return value!.toString();
-  }
-
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
-  }
-
-  get lending(): string {
-    let value = this.get("lending");
-    return value!.toString();
-  }
-
-  set lending(value: string) {
-    this.set("lending", Value.fromString(value));
-  }
-
-  get token(): Bytes {
-    let value = this.get("token");
-    return value!.toBytes();
-  }
-
-  set token(value: Bytes) {
-    this.set("token", Value.fromBytes(value));
-  }
-
-  get amount(): BigInt {
-    let value = this.get("amount");
-    return value!.toBigInt();
-  }
-
-  set amount(value: BigInt) {
-    this.set("amount", Value.fromBigInt(value));
-  }
-}
-
-export class Whitelist extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(id != null, "Cannot save Whitelist entity without an ID");
-    if (id) {
-      assert(
-        id.kind == ValueKind.STRING,
-        `Entities of type Whitelist must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
-      );
-      store.set("Whitelist", id.toString(), this);
-    }
-  }
-
-  static load(id: string): Whitelist | null {
-    return changetype<Whitelist | null>(store.get("Whitelist", id));
-  }
-
-  get id(): string {
-    let value = this.get("id");
-    return value!.toString();
-  }
-
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
-  }
-
-  get name(): string {
-    let value = this.get("name");
-    return value!.toString();
-  }
-
-  set name(value: string) {
-    this.set("name", Value.fromString(value));
-  }
-
-  get members(): Array<Bytes> {
-    let value = this.get("members");
-    return value!.toBytesArray();
-  }
-
-  set members(value: Array<Bytes>) {
-    this.set("members", Value.fromBytesArray(value));
-  }
-
-  get owner(): string {
-    let value = this.get("owner");
-    return value!.toString();
-  }
-
-  set owner(value: string) {
-    this.set("owner", Value.fromString(value));
-  }
-
-  get ownerAddress(): Bytes {
-    let value = this.get("ownerAddress");
-    return value!.toBytes();
-  }
-
-  set ownerAddress(value: Bytes) {
-    this.set("ownerAddress", Value.fromBytes(value));
-  }
-
-  get maxBorrowLimit(): i32 {
-    let value = this.get("maxBorrowLimit");
-    return value!.toI32();
-  }
-
-  set maxBorrowLimit(value: i32) {
-    this.set("maxBorrowLimit", Value.fromI32(value));
   }
 }
 
@@ -1479,511 +675,6 @@ export class Portal extends Entity {
   set status(value: string) {
     this.set("status", Value.fromString(value));
   }
-
-  get boughtAt(): BigInt | null {
-    let value = this.get("boughtAt");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set boughtAt(value: BigInt | null) {
-    if (!value) {
-      this.unset("boughtAt");
-    } else {
-      this.set("boughtAt", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get openedAt(): BigInt | null {
-    let value = this.get("openedAt");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set openedAt(value: BigInt | null) {
-    if (!value) {
-      this.unset("openedAt");
-    } else {
-      this.set("openedAt", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get claimedAt(): BigInt | null {
-    let value = this.get("claimedAt");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set claimedAt(value: BigInt | null) {
-    if (!value) {
-      this.unset("claimedAt");
-    } else {
-      this.set("claimedAt", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get timesTraded(): BigInt {
-    let value = this.get("timesTraded");
-    return value!.toBigInt();
-  }
-
-  set timesTraded(value: BigInt) {
-    this.set("timesTraded", Value.fromBigInt(value));
-  }
-
-  get historicalPrices(): Array<BigInt> | null {
-    let value = this.get("historicalPrices");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigIntArray();
-    }
-  }
-
-  set historicalPrices(value: Array<BigInt> | null) {
-    if (!value) {
-      this.unset("historicalPrices");
-    } else {
-      this.set("historicalPrices", Value.fromBigIntArray(<Array<BigInt>>value));
-    }
-  }
-
-  get activeListing(): BigInt | null {
-    let value = this.get("activeListing");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set activeListing(value: BigInt | null) {
-    if (!value) {
-      this.unset("activeListing");
-    } else {
-      this.set("activeListing", Value.fromBigInt(<BigInt>value));
-    }
-  }
-}
-
-export class ERC721Listing extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(id != null, "Cannot save ERC721Listing entity without an ID");
-    if (id) {
-      assert(
-        id.kind == ValueKind.STRING,
-        `Entities of type ERC721Listing must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
-      );
-      store.set("ERC721Listing", id.toString(), this);
-    }
-  }
-
-  static load(id: string): ERC721Listing | null {
-    return changetype<ERC721Listing | null>(store.get("ERC721Listing", id));
-  }
-
-  get id(): string {
-    let value = this.get("id");
-    return value!.toString();
-  }
-
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
-  }
-
-  get gotchi(): string | null {
-    let value = this.get("gotchi");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toString();
-    }
-  }
-
-  set gotchi(value: string | null) {
-    if (!value) {
-      this.unset("gotchi");
-    } else {
-      this.set("gotchi", Value.fromString(<string>value));
-    }
-  }
-
-  get category(): BigInt {
-    let value = this.get("category");
-    return value!.toBigInt();
-  }
-
-  set category(value: BigInt) {
-    this.set("category", Value.fromBigInt(value));
-  }
-
-  get erc721TokenAddress(): Bytes {
-    let value = this.get("erc721TokenAddress");
-    return value!.toBytes();
-  }
-
-  set erc721TokenAddress(value: Bytes) {
-    this.set("erc721TokenAddress", Value.fromBytes(value));
-  }
-
-  get tokenId(): BigInt {
-    let value = this.get("tokenId");
-    return value!.toBigInt();
-  }
-
-  set tokenId(value: BigInt) {
-    this.set("tokenId", Value.fromBigInt(value));
-  }
-
-  get seller(): Bytes {
-    let value = this.get("seller");
-    return value!.toBytes();
-  }
-
-  set seller(value: Bytes) {
-    this.set("seller", Value.fromBytes(value));
-  }
-
-  get buyer(): Bytes | null {
-    let value = this.get("buyer");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBytes();
-    }
-  }
-
-  set buyer(value: Bytes | null) {
-    if (!value) {
-      this.unset("buyer");
-    } else {
-      this.set("buyer", Value.fromBytes(<Bytes>value));
-    }
-  }
-
-  get recipient(): Bytes | null {
-    let value = this.get("recipient");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBytes();
-    }
-  }
-
-  set recipient(value: Bytes | null) {
-    if (!value) {
-      this.unset("recipient");
-    } else {
-      this.set("recipient", Value.fromBytes(<Bytes>value));
-    }
-  }
-
-  get timeCreated(): BigInt {
-    let value = this.get("timeCreated");
-    return value!.toBigInt();
-  }
-
-  set timeCreated(value: BigInt) {
-    this.set("timeCreated", Value.fromBigInt(value));
-  }
-
-  get timePurchased(): BigInt | null {
-    let value = this.get("timePurchased");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set timePurchased(value: BigInt | null) {
-    if (!value) {
-      this.unset("timePurchased");
-    } else {
-      this.set("timePurchased", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get cancelled(): boolean {
-    let value = this.get("cancelled");
-    return value!.toBoolean();
-  }
-
-  set cancelled(value: boolean) {
-    this.set("cancelled", Value.fromBoolean(value));
-  }
-
-  get priceInWei(): BigInt {
-    let value = this.get("priceInWei");
-    return value!.toBigInt();
-  }
-
-  set priceInWei(value: BigInt) {
-    this.set("priceInWei", Value.fromBigInt(value));
-  }
-
-  get blockCreated(): BigInt {
-    let value = this.get("blockCreated");
-    return value!.toBigInt();
-  }
-
-  set blockCreated(value: BigInt) {
-    this.set("blockCreated", Value.fromBigInt(value));
-  }
-
-  get portal(): string | null {
-    let value = this.get("portal");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toString();
-    }
-  }
-
-  set portal(value: string | null) {
-    if (!value) {
-      this.unset("portal");
-    } else {
-      this.set("portal", Value.fromString(<string>value));
-    }
-  }
-
-  get soldBefore(): boolean {
-    let value = this.get("soldBefore");
-    return value!.toBoolean();
-  }
-
-  set soldBefore(value: boolean) {
-    this.set("soldBefore", Value.fromBoolean(value));
-  }
-
-  get claimedAt(): BigInt | null {
-    let value = this.get("claimedAt");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set claimedAt(value: BigInt | null) {
-    if (!value) {
-      this.unset("claimedAt");
-    } else {
-      this.set("claimedAt", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get nameLowerCase(): string | null {
-    let value = this.get("nameLowerCase");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toString();
-    }
-  }
-
-  set nameLowerCase(value: string | null) {
-    if (!value) {
-      this.unset("nameLowerCase");
-    } else {
-      this.set("nameLowerCase", Value.fromString(<string>value));
-    }
-  }
-
-  get amountEquippedWearables(): i32 {
-    let value = this.get("amountEquippedWearables");
-    return value!.toI32();
-  }
-
-  set amountEquippedWearables(value: i32) {
-    this.set("amountEquippedWearables", Value.fromI32(value));
-  }
-
-  get kinship(): BigInt | null {
-    let value = this.get("kinship");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set kinship(value: BigInt | null) {
-    if (!value) {
-      this.unset("kinship");
-    } else {
-      this.set("kinship", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get experience(): BigInt | null {
-    let value = this.get("experience");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set experience(value: BigInt | null) {
-    if (!value) {
-      this.unset("experience");
-    } else {
-      this.set("experience", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get nrgTrait(): BigInt | null {
-    let value = this.get("nrgTrait");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set nrgTrait(value: BigInt | null) {
-    if (!value) {
-      this.unset("nrgTrait");
-    } else {
-      this.set("nrgTrait", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get aggTrait(): BigInt | null {
-    let value = this.get("aggTrait");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set aggTrait(value: BigInt | null) {
-    if (!value) {
-      this.unset("aggTrait");
-    } else {
-      this.set("aggTrait", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get spkTrait(): BigInt | null {
-    let value = this.get("spkTrait");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set spkTrait(value: BigInt | null) {
-    if (!value) {
-      this.unset("spkTrait");
-    } else {
-      this.set("spkTrait", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get brnTrait(): BigInt | null {
-    let value = this.get("brnTrait");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set brnTrait(value: BigInt | null) {
-    if (!value) {
-      this.unset("brnTrait");
-    } else {
-      this.set("brnTrait", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get eysTrait(): BigInt | null {
-    let value = this.get("eysTrait");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set eysTrait(value: BigInt | null) {
-    if (!value) {
-      this.unset("eysTrait");
-    } else {
-      this.set("eysTrait", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get eycTrait(): BigInt | null {
-    let value = this.get("eycTrait");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set eycTrait(value: BigInt | null) {
-    if (!value) {
-      this.unset("eycTrait");
-    } else {
-      this.set("eycTrait", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get collateral(): Bytes | null {
-    let value = this.get("collateral");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBytes();
-    }
-  }
-
-  set collateral(value: Bytes | null) {
-    if (!value) {
-      this.unset("collateral");
-    } else {
-      this.set("collateral", Value.fromBytes(<Bytes>value));
-    }
-  }
-
-  get withSetsNumericTraits(): Array<i32> | null {
-    let value = this.get("withSetsNumericTraits");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toI32Array();
-    }
-  }
-
-  set withSetsNumericTraits(value: Array<i32> | null) {
-    if (!value) {
-      this.unset("withSetsNumericTraits");
-    } else {
-      this.set("withSetsNumericTraits", Value.fromI32Array(<Array<i32>>value));
-    }
-  }
 }
 
 export class ERC1155Item extends Entity {
@@ -2060,410 +751,5 @@ export class ERC1155Item extends Entity {
 
   set equipped(value: i32) {
     this.set("equipped", Value.fromI32(value));
-  }
-}
-
-export class ERC1155Listing extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(id != null, "Cannot save ERC1155Listing entity without an ID");
-    if (id) {
-      assert(
-        id.kind == ValueKind.STRING,
-        `Entities of type ERC1155Listing must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
-      );
-      store.set("ERC1155Listing", id.toString(), this);
-    }
-  }
-
-  static load(id: string): ERC1155Listing | null {
-    return changetype<ERC1155Listing | null>(store.get("ERC1155Listing", id));
-  }
-
-  get id(): string {
-    let value = this.get("id");
-    return value!.toString();
-  }
-
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
-  }
-
-  get category(): BigInt {
-    let value = this.get("category");
-    return value!.toBigInt();
-  }
-
-  set category(value: BigInt) {
-    this.set("category", Value.fromBigInt(value));
-  }
-
-  get erc1155TokenAddress(): Bytes {
-    let value = this.get("erc1155TokenAddress");
-    return value!.toBytes();
-  }
-
-  set erc1155TokenAddress(value: Bytes) {
-    this.set("erc1155TokenAddress", Value.fromBytes(value));
-  }
-
-  get erc1155TypeId(): BigInt {
-    let value = this.get("erc1155TypeId");
-    return value!.toBigInt();
-  }
-
-  set erc1155TypeId(value: BigInt) {
-    this.set("erc1155TypeId", Value.fromBigInt(value));
-  }
-
-  get seller(): Bytes {
-    let value = this.get("seller");
-    return value!.toBytes();
-  }
-
-  set seller(value: Bytes) {
-    this.set("seller", Value.fromBytes(value));
-  }
-
-  get priceInWei(): BigInt {
-    let value = this.get("priceInWei");
-    return value!.toBigInt();
-  }
-
-  set priceInWei(value: BigInt) {
-    this.set("priceInWei", Value.fromBigInt(value));
-  }
-
-  get quantity(): BigInt {
-    let value = this.get("quantity");
-    return value!.toBigInt();
-  }
-
-  set quantity(value: BigInt) {
-    this.set("quantity", Value.fromBigInt(value));
-  }
-
-  get cancelled(): boolean {
-    let value = this.get("cancelled");
-    return value!.toBoolean();
-  }
-
-  set cancelled(value: boolean) {
-    this.set("cancelled", Value.fromBoolean(value));
-  }
-
-  get timeCreated(): BigInt {
-    let value = this.get("timeCreated");
-    return value!.toBigInt();
-  }
-
-  set timeCreated(value: BigInt) {
-    this.set("timeCreated", Value.fromBigInt(value));
-  }
-
-  get timeLastPurchased(): BigInt {
-    let value = this.get("timeLastPurchased");
-    return value!.toBigInt();
-  }
-
-  set timeLastPurchased(value: BigInt) {
-    this.set("timeLastPurchased", Value.fromBigInt(value));
-  }
-
-  get sold(): boolean {
-    let value = this.get("sold");
-    return value!.toBoolean();
-  }
-
-  set sold(value: boolean) {
-    this.set("sold", Value.fromBoolean(value));
-  }
-
-  get rarityLevel(): BigInt | null {
-    let value = this.get("rarityLevel");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set rarityLevel(value: BigInt | null) {
-    if (!value) {
-      this.unset("rarityLevel");
-    } else {
-      this.set("rarityLevel", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get rarityScoreModifier(): BigInt | null {
-    let value = this.get("rarityScoreModifier");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set rarityScoreModifier(value: BigInt | null) {
-    if (!value) {
-      this.unset("rarityScoreModifier");
-    } else {
-      this.set("rarityScoreModifier", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get nrgTraitModifier(): BigInt | null {
-    let value = this.get("nrgTraitModifier");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set nrgTraitModifier(value: BigInt | null) {
-    if (!value) {
-      this.unset("nrgTraitModifier");
-    } else {
-      this.set("nrgTraitModifier", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get aggTraitModifier(): BigInt | null {
-    let value = this.get("aggTraitModifier");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set aggTraitModifier(value: BigInt | null) {
-    if (!value) {
-      this.unset("aggTraitModifier");
-    } else {
-      this.set("aggTraitModifier", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get spkTraitModifier(): BigInt | null {
-    let value = this.get("spkTraitModifier");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set spkTraitModifier(value: BigInt | null) {
-    if (!value) {
-      this.unset("spkTraitModifier");
-    } else {
-      this.set("spkTraitModifier", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get brnTraitModifier(): BigInt | null {
-    let value = this.get("brnTraitModifier");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set brnTraitModifier(value: BigInt | null) {
-    if (!value) {
-      this.unset("brnTraitModifier");
-    } else {
-      this.set("brnTraitModifier", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get eysTraitModifier(): BigInt | null {
-    let value = this.get("eysTraitModifier");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set eysTraitModifier(value: BigInt | null) {
-    if (!value) {
-      this.unset("eysTraitModifier");
-    } else {
-      this.set("eysTraitModifier", Value.fromBigInt(<BigInt>value));
-    }
-  }
-
-  get eycTraitModifier(): BigInt | null {
-    let value = this.get("eycTraitModifier");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set eycTraitModifier(value: BigInt | null) {
-    if (!value) {
-      this.unset("eycTraitModifier");
-    } else {
-      this.set("eycTraitModifier", Value.fromBigInt(<BigInt>value));
-    }
-  }
-}
-
-export class ERC1155Purchase extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(id != null, "Cannot save ERC1155Purchase entity without an ID");
-    if (id) {
-      assert(
-        id.kind == ValueKind.STRING,
-        `Entities of type ERC1155Purchase must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
-      );
-      store.set("ERC1155Purchase", id.toString(), this);
-    }
-  }
-
-  static load(id: string): ERC1155Purchase | null {
-    return changetype<ERC1155Purchase | null>(store.get("ERC1155Purchase", id));
-  }
-
-  get id(): string {
-    let value = this.get("id");
-    return value!.toString();
-  }
-
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
-  }
-
-  get listingID(): BigInt {
-    let value = this.get("listingID");
-    return value!.toBigInt();
-  }
-
-  set listingID(value: BigInt) {
-    this.set("listingID", Value.fromBigInt(value));
-  }
-
-  get category(): BigInt {
-    let value = this.get("category");
-    return value!.toBigInt();
-  }
-
-  set category(value: BigInt) {
-    this.set("category", Value.fromBigInt(value));
-  }
-
-  get erc1155TokenAddress(): Bytes {
-    let value = this.get("erc1155TokenAddress");
-    return value!.toBytes();
-  }
-
-  set erc1155TokenAddress(value: Bytes) {
-    this.set("erc1155TokenAddress", Value.fromBytes(value));
-  }
-
-  get erc1155TypeId(): BigInt {
-    let value = this.get("erc1155TypeId");
-    return value!.toBigInt();
-  }
-
-  set erc1155TypeId(value: BigInt) {
-    this.set("erc1155TypeId", Value.fromBigInt(value));
-  }
-
-  get seller(): Bytes {
-    let value = this.get("seller");
-    return value!.toBytes();
-  }
-
-  set seller(value: Bytes) {
-    this.set("seller", Value.fromBytes(value));
-  }
-
-  get buyer(): Bytes {
-    let value = this.get("buyer");
-    return value!.toBytes();
-  }
-
-  set buyer(value: Bytes) {
-    this.set("buyer", Value.fromBytes(value));
-  }
-
-  get recipient(): Bytes | null {
-    let value = this.get("recipient");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBytes();
-    }
-  }
-
-  set recipient(value: Bytes | null) {
-    if (!value) {
-      this.unset("recipient");
-    } else {
-      this.set("recipient", Value.fromBytes(<Bytes>value));
-    }
-  }
-
-  get priceInWei(): BigInt {
-    let value = this.get("priceInWei");
-    return value!.toBigInt();
-  }
-
-  set priceInWei(value: BigInt) {
-    this.set("priceInWei", Value.fromBigInt(value));
-  }
-
-  get quantity(): BigInt {
-    let value = this.get("quantity");
-    return value!.toBigInt();
-  }
-
-  set quantity(value: BigInt) {
-    this.set("quantity", Value.fromBigInt(value));
-  }
-
-  get timeLastPurchased(): BigInt {
-    let value = this.get("timeLastPurchased");
-    return value!.toBigInt();
-  }
-
-  set timeLastPurchased(value: BigInt) {
-    this.set("timeLastPurchased", Value.fromBigInt(value));
-  }
-
-  get rarityLevel(): BigInt | null {
-    let value = this.get("rarityLevel");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set rarityLevel(value: BigInt | null) {
-    if (!value) {
-      this.unset("rarityLevel");
-    } else {
-      this.set("rarityLevel", Value.fromBigInt(<BigInt>value));
-    }
   }
 }
