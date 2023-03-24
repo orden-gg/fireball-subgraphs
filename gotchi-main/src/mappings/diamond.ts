@@ -4,7 +4,9 @@ import {
   BuyPortals,
   ClaimAavegotchi,
   GotchiLendingAdd,
+  GotchiLendingAdded,
   GotchiLendingCancel,
+  GotchiLendingCanceled,
   GotchiLendingEnd,
   GotchiLendingEnded,
   GotchiLendingExecute,
@@ -34,7 +36,6 @@ import {
 import {
   addBorrowedGotchi,
   addLetOutGotchi,
-  getGotchiLendingInfo,
   removeBorrowedGotchi,
   removeLentOutGotchi,
   updateGotchiLending
@@ -140,7 +141,7 @@ export function handlePortalOpened(event: PortalOpened): void {
 
 export function handleClaimAavegotchi(event: ClaimAavegotchi): void {
   const portal = loadOrCreatePortal(event.params._tokenId);
-  let gotchi = loadOrCreateGotchi(event.params._tokenId, event)!;
+  let gotchi = loadOrCreateGotchi(event.params._tokenId)!;
   gotchi = updateGotchiInfo(gotchi, event.params._tokenId, event);
   gotchi.gotchiId = event.params._tokenId;
 
@@ -178,7 +179,7 @@ export function handleClaimAavegotchi(event: ClaimAavegotchi): void {
 
 export function handleSpendSkillpoints(event: SpendSkillpoints): void {
   const contract = AavegotchiDiamond.bind(event.address);
-  let gotchi = loadOrCreateGotchi(event.params._tokenId, event, false)!;
+  let gotchi = loadOrCreateGotchi(event.params._tokenId, false)!;
 
   if (gotchi) {
     const _response = contract.try_availableSkillPoints(event.params._tokenId);
@@ -197,7 +198,7 @@ export function handleTransfer(event: Transfer): void {
   const oldOwner = loadOrCreatePlayer(event.params._from);
   const newOwner = loadOrCreatePlayer(event.params._to);
   const portal = loadOrCreatePortal(id, false);
-  let gotchi = loadOrCreateGotchi(id, event, false);
+  let gotchi = loadOrCreateGotchi(id, false);
 
   // ERC721 transfer can be portal or gotchi based, so we have to check it.
   if (gotchi != null) {
@@ -215,9 +216,6 @@ export function handleTransfer(event: Transfer): void {
       gotchi = updateGotchiInfo(gotchi, event.params._tokenId, event);
     }
     gotchi.owner = newOwner.id;
-    if (!gotchi.lending) {
-      gotchi.originalOwner = newOwner.id;
-    }
     gotchi.save();
 
     oldOwner.gotchisAmount = oldOwner.gotchisAmount - 1;
@@ -323,7 +321,7 @@ export function handleTransferBatch(event: TransferBatch): void {
 
 export function handleTransferFromParent(event: TransferFromParent): void {
   const contract = AavegotchiDiamond.bind(event.address);
-  const gotchi = loadOrCreateGotchi(event.params._fromTokenId, event);
+  const gotchi = loadOrCreateGotchi(event.params._fromTokenId);
   const _itemType = contract.getItemType(event.params._tokenTypeId);
 
   if (gotchi != null && gotchi.originalOwner != null) {
@@ -342,7 +340,7 @@ export function handleTransferFromParent(event: TransferFromParent): void {
 
 export function handleTransferToParent(event: TransferToParent): void {
   const contract = AavegotchiDiamond.bind(event.address);
-  const gotchi = loadOrCreateGotchi(event.params._toTokenId, event);
+  const gotchi = loadOrCreateGotchi(event.params._toTokenId);
   const _itemType = contract.getItemType(event.params._tokenTypeId);
 
   if (gotchi != null) {
@@ -381,52 +379,10 @@ export function handleTransferToParent(event: TransferToParent): void {
   }
 }
 
-export function handleGotchiLendingAdd(event: GotchiLendingAdd): void {
-  if (event.block.number.gt(BLOCK_DISABLE_OLD_LENDING_EVENTS)) {
-    return;
-  }
+export function handleGotchiLendingAdded(event: GotchiLendingAdded): void {
+  const gotchi = updateGotchiLending(event.params.listingId, event.params.tokenId, event.params.lender, true, event);
 
-  const gotchi = updateGotchiLending(event.params.listingId, event);
-
-  if (gotchi) {
-    gotchi.save();
-  }
-}
-
-export function handleGotchiLendingCancel(event: GotchiLendingCancel): void {
-  if (event.block.number.gt(BLOCK_DISABLE_OLD_LENDING_EVENTS)) {
-    return;
-  }
-
-  const gotchi = updateGotchiLending(event.params.listingId, event);
-
-  if (gotchi) {
-    gotchi.save();
-  }
-}
-
-export function handleGotchiLendingExecute(event: GotchiLendingExecute): void {
-  if (event.block.number.gt(BLOCK_DISABLE_OLD_LENDING_EVENTS)) {
-    return;
-  }
-
-  const _response = getGotchiLendingInfo(event.params.listingId, event.address);
-
-  if (!_response.reverted) {
-    const listingResult = _response.value.value0;
-    const gotchiResult = _response.value.value1;
-
-    const lender = addLetOutGotchi(Address.fromBytes(listingResult.lender), gotchiResult.tokenId);
-    lender.save();
-
-    const borrower = addBorrowedGotchi(Address.fromBytes(listingResult.borrower), gotchiResult.tokenId);
-    borrower.save();
-
-    // update originalOwner to lender
-    const gotchi = loadOrCreateGotchi(gotchiResult.tokenId, event)!;
-    gotchi.originalOwner = lender.id;
-    gotchi.save();
-  }
+  gotchi.save();
 }
 
 export function handleGotchiLendingExecuted(event: GotchiLendingExecuted): void {
@@ -441,34 +397,15 @@ export function handleGotchiLendingExecuted(event: GotchiLendingExecuted): void 
   borrower.save();
 
   // update originalOwner to lender
-  const gotchi = loadOrCreateGotchi(event.params.tokenId, event)!;
+  const gotchi = loadOrCreateGotchi(event.params.tokenId)!;
   gotchi.originalOwner = lender.id;
   gotchi.save();
 }
 
-export function handleGotchiLendingEnd(event: GotchiLendingEnd): void {
-  if (event.block.number.gt(BLOCK_DISABLE_OLD_LENDING_EVENTS)) {
-    return;
-  }
+export function handleGotchiLendingCanceled(event: GotchiLendingCanceled): void {
+  const gotchi = updateGotchiLending(event.params.listingId, event.params.tokenId, event.params.lender, false, event);
 
-  const _response = getGotchiLendingInfo(event.params.listingId, event.address);
-
-  if (!_response.reverted) {
-    const listingResult = _response.value.value0;
-    const gotchiResult = _response.value.value1;
-
-    const gotchi = loadOrCreateGotchi(gotchiResult.tokenId, event)!;
-
-    gotchi.lending = null;
-    gotchi.originalOwner = listingResult.originalOwner.toHexString();
-    gotchi.save();
-
-    const lender = removeLentOutGotchi(listingResult.originalOwner, gotchi.gotchiId);
-    lender.save();
-
-    const borrower = removeBorrowedGotchi(listingResult.borrower, gotchiResult.tokenId);
-    borrower.save();
-  }
+  gotchi.save();
 }
 
 export function handleGotchiLendingEnded(event: GotchiLendingEnded): void {
@@ -482,7 +419,7 @@ export function handleGotchiLendingEnded(event: GotchiLendingEnded): void {
   const borrower = removeBorrowedGotchi(event.params.borrower, event.params.tokenId);
   borrower.save();
 
-  let gotchi = loadOrCreateGotchi(event.params.tokenId, event)!;
+  let gotchi = loadOrCreateGotchi(event.params.tokenId)!;
   gotchi.lending = null;
   gotchi.originalOwner = lender.id;
   gotchi.save();

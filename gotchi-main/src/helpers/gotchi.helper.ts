@@ -3,11 +3,7 @@ import { AavegotchiDiamond } from '../../generated/AavegotchiDiamond/AavegotchiD
 import { AavegotchiOption, Gotchi } from '../../generated/schema';
 import { loadOrCreatePlayer } from './player.helper';
 
-export const loadOrCreateGotchi = (
-  id: BigInt,
-  event: ethereum.Event,
-  createIfNotFound: boolean = true
-): Gotchi | null => {
+export const loadOrCreateGotchi = (id: BigInt, createIfNotFound: boolean = true): Gotchi | null => {
   let gotchi = Gotchi.load(id.toString());
 
   if (gotchi == null && createIfNotFound) {

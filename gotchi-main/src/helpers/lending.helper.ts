@@ -1,30 +1,23 @@
 import { BigInt, Address, ethereum, log } from '@graphprotocol/graph-ts';
-import {
-  AavegotchiDiamond,
-  AavegotchiDiamond__getGotchiLendingListingInfoResult
-} from '../../generated/AavegotchiDiamond/AavegotchiDiamond';
 import { Gotchi, Player } from '../../generated/schema';
 import { loadOrCreateGotchi, updateGotchiInfo } from './gotchi.helper';
 import { loadOrCreatePlayer } from './player.helper';
 
-export function updateGotchiLending(listingId: BigInt, event: ethereum.Event): Gotchi | null {
-  const _response = getGotchiLendingInfo(listingId, event.address);
-
-  if (_response.reverted) {
-    return null;
-  }
-
-  const listingResult = _response.value.value0;
-  const gotchiResult = _response.value.value1;
-
-  let gotchi = loadOrCreateGotchi(gotchiResult.tokenId, event)!;
+export function updateGotchiLending(
+  listingId: BigInt,
+  tokenId: BigInt,
+  lenderAddress: Address,
+  isSetLending: boolean,
+  event: ethereum.Event
+): Gotchi {
+  let gotchi = loadOrCreateGotchi(tokenId)!;
 
   if (!gotchi.modifiedRarityScore) {
     log.warning('modifiedRarityScore {}', ['not found']);
-    gotchi = updateGotchiInfo(gotchi, gotchiResult.tokenId, event);
+    gotchi = updateGotchiInfo(gotchi, tokenId, event);
   }
 
-  if (!listingResult.completed && !listingResult.canceled) {
+  if (isSetLending) {
     gotchi.lending = listingId;
   } else {
     gotchi.lending = null;
@@ -32,23 +25,13 @@ export function updateGotchiLending(listingId: BigInt, event: ethereum.Event): G
 
   // remove Hotfix for lending
   if (gotchi.originalOwner == null) {
-    const lender = loadOrCreatePlayer(listingResult.lender);
+    const lender = loadOrCreatePlayer(lenderAddress);
     lender.save();
 
     gotchi.originalOwner = lender.id;
   }
 
   return gotchi;
-}
-
-export function getGotchiLendingInfo(
-  listingId: BigInt,
-  address: Address
-): ethereum.CallResult<AavegotchiDiamond__getGotchiLendingListingInfoResult> {
-  const contract = AavegotchiDiamond.bind(address);
-  const _response = contract.try_getGotchiLendingListingInfo(listingId);
-
-  return _response;
 }
 
 export function addLetOutGotchi(address: Address, tokenId: BigInt): Player {

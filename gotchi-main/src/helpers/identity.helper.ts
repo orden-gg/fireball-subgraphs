@@ -62,7 +62,7 @@ export function updateIdentityByGotchi(gotchi: Gotchi): Identity {
 }
 // @ts-ignore
 export function removeClaimedIdentity(gotchiId: string, event: ethereum.Event): Identity | null {
-  const claimedGotchi = loadOrCreateGotchi(BigInt.fromString(gotchiId), event);
+  const claimedGotchi = loadOrCreateGotchi(BigInt.fromString(gotchiId));
 
   if (claimedGotchi) {
     const identity = loadOrCreateIdentity(claimedGotchi.identity);
