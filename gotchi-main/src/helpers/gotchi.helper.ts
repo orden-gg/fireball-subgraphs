@@ -58,6 +58,7 @@ export function updateGotchiInfo(gotchi: Gotchi, id: BigInt, event: ethereum.Eve
     gotchi.hauntId = gotchiInfo.hauntId;
     gotchi.numericTraits = gotchiInfo.numericTraits;
     gotchi.modifiedRarityScore = gotchiInfo.modifiedRarityScore;
+    gotchi.equippedWearables = gotchiInfo.equippedWearables;
   } else {
     log.warning("Aavegotchi {} couldn't be updated at block: {} tx_hash: {}", [
       id.toString(),

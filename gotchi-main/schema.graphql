@@ -8,9 +8,9 @@ type Player @entity {
   portalsAmount: Int!
 
   gotchisOwned: [Gotchi!]! @derivedFrom(field: "owner")
+  gotchisOwnedAmount: Int!
 
   gotchisOriginalOwned: [Gotchi!]! @derivedFrom(field: "originalOwner")
-  gotchisAmount: Int!
 
   gotchisLentOut: [BigInt!]!
   gotchisLentOutAmount: Int!
@@ -50,6 +50,7 @@ type Gotchi @entity {
   numericTraits: [Int!]!
   hauntId: BigInt!
   identity: Identity!
+  equippedWearables: [Int!]!
   # status: BigInt!
 
   lending: BigInt

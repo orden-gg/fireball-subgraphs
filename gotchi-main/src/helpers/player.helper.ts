@@ -8,7 +8,7 @@ export function loadOrCreatePlayer(id: Address): Player {
     player = new Player(id.toHexString());
 
     player.portalsAmount = 0;
-    player.gotchisAmount = 0;
+    player.gotchisOwnedAmount = 0;
     player.gotchisBorrowedAmount = 0;
     player.gotchisLentOutAmount = 0;
     player.itemsAmount = 0;

@@ -1,6 +1,7 @@
 import { Address, BigInt, log } from '@graphprotocol/graph-ts';
 import {
   AavegotchiDiamond,
+  AavegotchiDiamond__getItemTypeResultItemType_Struct,
   BuyPortals,
   ClaimAavegotchi,
   GotchiLendingAdd,
@@ -21,6 +22,7 @@ import {
   TransferToParent,
   Xingyun
 } from '../../generated/AavegotchiDiamond/AavegotchiDiamond';
+import { ERC1155Item } from '../../generated/schema';
 import {
   loadOrCreatePlayer,
   loadOrCreateItem,
@@ -31,7 +33,9 @@ import {
   updateIdentityByGotchi,
   updateIdentityByOptions,
   removeUnclaimedIdentity,
-  removeClaimedIdentity
+  removeClaimedIdentity,
+  isItemCreated,
+  switchEquippedItems
 } from '../helpers';
 import {
   addBorrowedGotchi,
@@ -149,7 +153,7 @@ export function handleClaimAavegotchi(event: ClaimAavegotchi): void {
     const owner = loadOrCreatePlayer(Address.fromString(gotchi.originalOwner as string));
 
     owner.portalsAmount = owner.portalsAmount - 1;
-    owner.gotchisAmount = owner.gotchisAmount + 1;
+    owner.gotchisOwnedAmount = owner.gotchisOwnedAmount + 1;
 
     owner.save();
   }
@@ -178,10 +182,10 @@ export function handleClaimAavegotchi(event: ClaimAavegotchi): void {
 }
 
 export function handleSpendSkillpoints(event: SpendSkillpoints): void {
-  const contract = AavegotchiDiamond.bind(event.address);
-  let gotchi = loadOrCreateGotchi(event.params._tokenId, false)!;
+  let gotchi = loadOrCreateGotchi(event.params._tokenId, false);
 
   if (gotchi) {
+    const contract = AavegotchiDiamond.bind(event.address);
     const _response = contract.try_availableSkillPoints(event.params._tokenId);
 
     if (!_response.reverted) {
@@ -190,6 +194,7 @@ export function handleSpendSkillpoints(event: SpendSkillpoints): void {
       gotchi.save();
     }
   } else {
+    log.warning('GOTCHI IS {}', ['NULL']);
   }
 }
 
@@ -206,7 +211,7 @@ export function handleTransfer(event: Transfer): void {
 
     if (isSucrefied) {
       log.warning('Sucrefied gotchi {}', [gotchi.id]);
-      const identity = removeClaimedIdentity(gotchi.id, event);
+      const identity = removeClaimedIdentity(gotchi.id);
 
       if (identity) {
         identity.save();
@@ -218,8 +223,10 @@ export function handleTransfer(event: Transfer): void {
     gotchi.owner = newOwner.id;
     gotchi.save();
 
-    oldOwner.gotchisAmount = oldOwner.gotchisAmount - 1;
-    newOwner.gotchisAmount = newOwner.gotchisAmount + 1;
+    oldOwner.gotchisOwnedAmount = oldOwner.gotchisOwnedAmount - 1;
+    newOwner.gotchisOwnedAmount = newOwner.gotchisOwnedAmount + 1;
+
+    switchEquippedItems(gotchi.equippedWearables, event.params._from, event.params._to, event);
   } else {
     portal.owner = newOwner.id;
     portal.save();
@@ -261,29 +268,27 @@ export function handleTransferSingle(event: TransferSingle): void {
   const contract = AavegotchiDiamond.bind(event.address);
   const _itemType = contract.getItemType(event.params._id);
 
-  const oldOwner = loadOrCreatePlayer(event.params._from);
-  const newOwner = loadOrCreatePlayer(event.params._to);
-
-  oldOwner.itemsAmount = oldOwner.itemsAmount - 1;
-  newOwner.itemsAmount = newOwner.itemsAmount + 1;
-
-  if (_itemType.category == ERC1155ItemCategoty.Badge) {
+  if (_itemType.category === ERC1155ItemCategoty.Badge) {
     log.warning('BADGE {}', [event.params._id.toString()]);
   } else {
-    const wearableFrom = loadOrCreateItem(event.params._id, event.params._from, _itemType);
-    const wearableTo = loadOrCreateItem(event.params._id, event.params._to, _itemType);
+    const oldOwner = loadOrCreatePlayer(event.params._from);
+    const newOwner = loadOrCreatePlayer(event.params._to);
+
+    const wearableFrom = loadOrCreateItem(event.params._id, event.params._from, _itemType.category);
+    const wearableTo = loadOrCreateItem(event.params._id, event.params._to, _itemType.category);
 
     const amount = event.params._value.toI32();
 
     wearableFrom.amount = wearableFrom.amount - amount;
     wearableTo.amount = wearableTo.amount + amount;
-
     wearableFrom.save();
     wearableTo.save();
-  }
 
-  oldOwner.save();
-  newOwner.save();
+    oldOwner.itemsAmount = oldOwner.itemsAmount - 1;
+    newOwner.itemsAmount = newOwner.itemsAmount + 1;
+    oldOwner.save();
+    newOwner.save();
+  }
 }
 
 export function handleTransferBatch(event: TransferBatch): void {
@@ -291,15 +296,14 @@ export function handleTransferBatch(event: TransferBatch): void {
   const oldOwner = loadOrCreatePlayer(event.params._from);
   const newOwner = loadOrCreatePlayer(event.params._to);
   let transferedAmount = 0;
+  const _itemType = contract.getItemType(event.params._ids[0]);
 
-  for (let i = 0; i < event.params._ids.length; i++) {
-    const _itemType = contract.getItemType(event.params._ids[i]);
-
-    if (_itemType.category == ERC1155ItemCategoty.Badge) {
-      log.warning('BADGE {}', [event.params._ids[i].toString()]);
-    } else {
-      const wearableFrom = loadOrCreateItem(event.params._ids[i], event.params._from, _itemType);
-      const wearableTo = loadOrCreateItem(event.params._ids[i], event.params._to, _itemType);
+  if (_itemType.category === ERC1155ItemCategoty.Badge) {
+    log.warning('BADGE {}', [event.params._ids[0].toString()]);
+  } else {
+    for (let i = 0; i < event.params._ids.length; i++) {
+      const wearableFrom = loadOrCreateItem(event.params._ids[i], event.params._from, _itemType.category);
+      const wearableTo = loadOrCreateItem(event.params._ids[i], event.params._to, _itemType.category);
       const amount = event.params._values[i].toI32();
 
       wearableFrom.amount = wearableFrom.amount - amount;
@@ -310,24 +314,32 @@ export function handleTransferBatch(event: TransferBatch): void {
       wearableFrom.save();
       wearableTo.save();
     }
+
+    oldOwner.itemsAmount = oldOwner.itemsAmount - transferedAmount;
+    newOwner.itemsAmount = newOwner.itemsAmount + transferedAmount;
+
+    oldOwner.save();
+    newOwner.save();
   }
-
-  oldOwner.itemsAmount = oldOwner.itemsAmount - transferedAmount;
-  newOwner.itemsAmount = newOwner.itemsAmount + transferedAmount;
-
-  oldOwner.save();
-  newOwner.save();
 }
 
 export function handleTransferFromParent(event: TransferFromParent): void {
-  const contract = AavegotchiDiamond.bind(event.address);
   const gotchi = loadOrCreateGotchi(event.params._fromTokenId);
-  const _itemType = contract.getItemType(event.params._tokenTypeId);
+  let _itemType: AavegotchiDiamond__getItemTypeResultItemType_Struct | null = null;
 
   if (gotchi != null && gotchi.originalOwner != null) {
     const ownerAddress = Address.fromString(gotchi.originalOwner as string);
     const owner = loadOrCreatePlayer(ownerAddress);
-    const item = loadOrCreateItem(event.params._tokenTypeId, ownerAddress, _itemType);
+    const isCreated = isItemCreated(event.params._tokenTypeId, ownerAddress);
+    let item: ERC1155Item | null = null;
+
+    if (isCreated) {
+      item = loadOrCreateItem(event.params._tokenTypeId, ownerAddress, -1);
+    } else {
+      const contract = AavegotchiDiamond.bind(event.address);
+      _itemType = contract.getItemType(event.params._tokenTypeId);
+      item = loadOrCreateItem(event.params._tokenTypeId, ownerAddress, _itemType.category);
+    }
 
     item.equipped = item.equipped - event.params._value.toI32();
 
@@ -341,9 +353,9 @@ export function handleTransferFromParent(event: TransferFromParent): void {
 export function handleTransferToParent(event: TransferToParent): void {
   const contract = AavegotchiDiamond.bind(event.address);
   const gotchi = loadOrCreateGotchi(event.params._toTokenId);
-  const _itemType = contract.getItemType(event.params._tokenTypeId);
 
   if (gotchi != null) {
+    const _itemType = contract.getItemType(event.params._tokenTypeId);
     if (_itemType.category === ERC1155ItemCategoty.Badge) {
       const badges = gotchi.badges;
 
@@ -357,19 +369,21 @@ export function handleTransferToParent(event: TransferToParent): void {
         event.params._tokenTypeId.toString(),
         event.params._toTokenId.toString()
       ]);
-    } else if (gotchi.originalOwner != null) {
-      const owner = loadOrCreatePlayer(Address.fromString(gotchi.originalOwner as string));
-      const item = loadOrCreateItem(
-        event.params._tokenTypeId,
-        Address.fromString(gotchi.originalOwner as string),
-        _itemType
-      );
+    } else {
+      if (gotchi.originalOwner != null) {
+        const owner = loadOrCreatePlayer(Address.fromString(gotchi.originalOwner as string));
+        const item = loadOrCreateItem(
+          event.params._tokenTypeId,
+          Address.fromString(gotchi.originalOwner as string),
+          _itemType.category
+        );
 
-      item.equipped = item.equipped + event.params._value.toI32();
+        item.equipped = item.equipped + event.params._value.toI32();
 
-      owner.itemsAmount = owner.itemsAmount + 1;
+        owner.itemsAmount = owner.itemsAmount + 1;
 
-      item.save();
+        item.save();
+      }
     }
 
     log.warning('FROM PARENT id {}, category {}', [
@@ -383,6 +397,8 @@ export function handleGotchiLendingAdded(event: GotchiLendingAdded): void {
   const gotchi = updateGotchiLending(event.params.listingId, event.params.tokenId, event.params.lender, true, event);
 
   gotchi.save();
+
+  switchEquippedItems(gotchi.equippedWearables, Address.fromString(gotchi.owner as string), event.params.lender, event);
 }
 
 export function handleGotchiLendingExecuted(event: GotchiLendingExecuted): void {
@@ -406,6 +422,8 @@ export function handleGotchiLendingCanceled(event: GotchiLendingCanceled): void 
   const gotchi = updateGotchiLending(event.params.listingId, event.params.tokenId, event.params.lender, false, event);
 
   gotchi.save();
+
+  switchEquippedItems(gotchi.equippedWearables, event.params.lender, Address.fromString(gotchi.owner as string), event);
 }
 
 export function handleGotchiLendingEnded(event: GotchiLendingEnded): void {
@@ -423,4 +441,6 @@ export function handleGotchiLendingEnded(event: GotchiLendingEnded): void {
   gotchi.lending = null;
   gotchi.originalOwner = lender.id;
   gotchi.save();
+
+  switchEquippedItems(gotchi.equippedWearables, event.params.lender, Address.fromString(gotchi.owner as string), event);
 }
