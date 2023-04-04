@@ -1,6 +1,13 @@
-import { BigInt, Bytes, ethereum, log } from '@graphprotocol/graph-ts';
+import { BigInt, Bytes, log } from '@graphprotocol/graph-ts';
 import { AavegotchiOption, Gotchi, Identity } from '../../generated/schema';
 import {
+  amAAVE,
+  amDAI,
+  amUSDC,
+  amUSDT,
+  amWBTC,
+  amWETH,
+  amWMATIC,
   ColorCommon,
   ColorMythicalHigh,
   ColorMythicalLow,
@@ -8,6 +15,15 @@ import {
   ColorRareLow,
   ColorUncommonHigh,
   ColorUncommonLow,
+  maAAVE,
+  maDAI,
+  maLINK,
+  maTUSD,
+  maUNI,
+  maUSDC,
+  maUSDT,
+  maWETH,
+  maYFI,
   ShapeCommon1,
   ShapeCommon2,
   ShapeCommon3,
@@ -47,12 +63,13 @@ export function loadOrCreateIdentity(id: string): Identity {
 export function updateIdentityByGotchi(gotchi: Gotchi): Identity {
   const color = getColorNameByValue(gotchi.numericTraits[TraitsNumberTypes.EYC]);
   const shape = getShapeNameByValue(gotchi.numericTraits[TraitsNumberTypes.EYS]);
-  const identity = loadOrCreateIdentity(getIdentityId(gotchi.collateral, shape, color, gotchi.hauntId.toI32()));
+  const collateral = getCollateralName(gotchi.collateral.toHexString());
+  const identity = loadOrCreateIdentity(getIdentityId(collateral, shape, color, gotchi.hauntId.toI32()));
   const identityClaimed = identity.claimed;
 
   identityClaimed.push(gotchi.id);
 
-  identity.collateral = gotchi.collateral;
+  identity.collateral = collateral;
   identity.shape = shape;
   identity.color = color;
   identity.claimed = identityClaimed;
@@ -68,8 +85,8 @@ export function removeClaimedIdentity(gotchiId: string): Identity | null {
     const identity = loadOrCreateIdentity(claimedGotchi.identity);
     const clamedIdentities: string[] = new Array<string>();
 
-    for (let i = 0; i < identity.unclaimed.length; i++) {
-      const claimedGotchiId: string = identity.unclaimed[i];
+    for (let i = 0; i < identity.claimed.length; i++) {
+      const claimedGotchiId: string = identity.claimed[i];
 
       if (claimedGotchiId != claimedGotchi.id) {
         clamedIdentities.push(claimedGotchiId);
@@ -91,9 +108,8 @@ export function removeClaimedIdentity(gotchiId: string): Identity | null {
 export function updateIdentityByOptions(unclaimedGotchi: AavegotchiOption): Identity {
   const shape = getShapeNameByValue(unclaimedGotchi.numericTraits[TraitsNumberTypes.EYS]);
   const color = getColorNameByValue(unclaimedGotchi.numericTraits[TraitsNumberTypes.EYC]);
-  const identity = loadOrCreateIdentity(
-    getIdentityId(unclaimedGotchi.collateralType, shape, color, unclaimedGotchi.hauntId)
-  );
+  const collateral = getCollateralName(unclaimedGotchi.collateralType.toHexString());
+  const identity = loadOrCreateIdentity(getIdentityId(collateral, shape, color, unclaimedGotchi.hauntId));
 
   const unclamedIdentities = identity.unclaimed;
 
@@ -101,7 +117,7 @@ export function updateIdentityByOptions(unclaimedGotchi: AavegotchiOption): Iden
 
   identity.unclaimedAmount = unclamedIdentities.length;
 
-  identity.collateral = unclaimedGotchi.collateralType;
+  identity.collateral = collateral;
   identity.shape = shape;
   identity.color = color;
   identity.unclaimed = unclamedIdentities;
@@ -133,10 +149,10 @@ export function removeUnclaimedIdentity(portalId: string, position: i32): Identi
 }
 
 // @ts-ignore
-export function getIdentityId(collateral: Bytes, shape: string, color: string, hauntId: i32): string {
+export function getIdentityId(collateral: string, shape: string, color: string, hauntId: i32): string {
   const isMythLowShape = shape === ShapeMythicalLow1 || shape === ShapeMythicalLow2;
 
-  return `${collateral.toHexString()}, ${isMythLowShape ? `${shape} h${hauntId}` : shape}, ${color}`;
+  return `${collateral}, ${isMythLowShape ? `${shape} h${hauntId}` : shape}, ${color}`;
 }
 
 // @ts-ignore
@@ -170,4 +186,20 @@ export function getColorNameByValue(value: i32): string {
   else if (value >= 75 && value <= 89) return ColorUncommonHigh;
   else if (value >= 90 && value <= 97) return ColorRareHigh;
   else return ColorMythicalHigh;
+}
+
+export function getCollateralName(address: string): string {
+  if (address == maUSDC || address == amUSDC) return 'USDC';
+  else if (address == maDAI || address == amDAI) return 'DAI';
+  else if (address == maAAVE || address == amAAVE) return 'AAVE';
+  else if (address == maUSDT || address == amUSDT) return 'USDT';
+  else if (address == maWETH) return 'maWETH';
+  else if (address == amWETH) return 'amWETH';
+  else if (address == maUNI) return 'UNI';
+  else if (address == maTUSD) return 'TUSD';
+  else if (address == maLINK) return 'LINK';
+  else if (address == maYFI) return 'YFI';
+  else if (address == amWMATIC) return 'MATIC';
+  else if (address == amWBTC) return 'BTC';
+  else return 'unknown';
 }

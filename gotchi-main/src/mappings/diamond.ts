@@ -53,7 +53,7 @@ import {
   PORTAL_STATUS_OPENED
 } from '../shared';
 
-// HENDLE PORTALS
+// PORTAL/GOTCHI HENDLERS
 export function handleMintPortals(event: MintPortals): void {
   const buyer = loadOrCreatePlayer(event.params._from);
   const owner = loadOrCreatePlayer(event.params._to);
@@ -210,12 +210,13 @@ export function handleTransfer(event: Transfer): void {
     const isSucrefied = event.params._to === Address.zero();
 
     if (isSucrefied) {
-      log.warning('Sucrefied gotchi {}', [gotchi.id]);
       const identity = removeClaimedIdentity(gotchi.id);
 
       if (identity) {
         identity.save();
       }
+
+      oldOwner.gotchisOwnedAmount = oldOwner.gotchisOwnedAmount - 1;
     }
     if (!gotchi.modifiedRarityScore) {
       gotchi = updateGotchiInfo(gotchi, event.params._tokenId, event);
@@ -296,12 +297,13 @@ export function handleTransferBatch(event: TransferBatch): void {
   const oldOwner = loadOrCreatePlayer(event.params._from);
   const newOwner = loadOrCreatePlayer(event.params._to);
   let transferedAmount = 0;
-  const _itemType = contract.getItemType(event.params._ids[0]);
 
-  if (_itemType.category === ERC1155ItemCategoty.Badge) {
-    log.warning('BADGE {}', [event.params._ids[0].toString()]);
-  } else {
-    for (let i = 0; i < event.params._ids.length; i++) {
+  for (let i = 0; i < event.params._ids.length; i++) {
+    const _itemType = contract.getItemType(event.params._ids[i]);
+
+    if (_itemType.category == ERC1155ItemCategoty.Badge) {
+      log.warning('BADGE {}', [event.params._ids[i].toString()]);
+    } else {
       const wearableFrom = loadOrCreateItem(event.params._ids[i], event.params._from, _itemType.category);
       const wearableTo = loadOrCreateItem(event.params._ids[i], event.params._to, _itemType.category);
       const amount = event.params._values[i].toI32();
@@ -314,13 +316,13 @@ export function handleTransferBatch(event: TransferBatch): void {
       wearableFrom.save();
       wearableTo.save();
     }
-
-    oldOwner.itemsAmount = oldOwner.itemsAmount - transferedAmount;
-    newOwner.itemsAmount = newOwner.itemsAmount + transferedAmount;
-
-    oldOwner.save();
-    newOwner.save();
   }
+
+  oldOwner.itemsAmount = oldOwner.itemsAmount - transferedAmount;
+  newOwner.itemsAmount = newOwner.itemsAmount + transferedAmount;
+
+  oldOwner.save();
+  newOwner.save();
 }
 
 export function handleTransferFromParent(event: TransferFromParent): void {
@@ -364,11 +366,6 @@ export function handleTransferToParent(event: TransferToParent): void {
       gotchi.badges = badges;
 
       gotchi.save();
-
-      log.warning('EQUIP BADGE {}, GOTCHI {}', [
-        event.params._tokenTypeId.toString(),
-        event.params._toTokenId.toString()
-      ]);
     } else {
       if (gotchi.originalOwner != null) {
         const owner = loadOrCreatePlayer(Address.fromString(gotchi.originalOwner as string));
@@ -385,14 +382,10 @@ export function handleTransferToParent(event: TransferToParent): void {
         item.save();
       }
     }
-
-    log.warning('FROM PARENT id {}, category {}', [
-      event.params._tokenTypeId.toString(),
-      _itemType.category.toString()
-    ]);
   }
 }
 
+// LENDING HENDLERS
 export function handleGotchiLendingAdded(event: GotchiLendingAdded): void {
   const gotchi = updateGotchiLending(event.params.listingId, event.params.tokenId, event.params.lender, true, event);
 

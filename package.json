@@ -16,7 +16,7 @@
     "dotenv-cli": "^7.0.0"
   },
   "scripts": {
-    "auth:stage": "dotenv -- cross-var graph auth --product hosted-service %SUBGRAPH_SKV_API_KEY%",
+    "auth:stage": "dotenv -- cross-var graph auth --product hosted-service %SUBGRAPH_STAGE_API_KEY%",
     "auth:prod": "dotenv -- cross-var graph auth --product hosted-service %SUBGRAPH_PROD_API_KEY%",
     "codegen:main": "graph codegen gotchi-main/subgraph.yaml -o gotchi-main/generated",
     "deploy:main:stage": "cd gotchi-main && graph deploy --product hosted-service dudendy/kratoman",
