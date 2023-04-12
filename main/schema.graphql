@@ -2,8 +2,6 @@ type Player @entity {
   "player address"
   id: ID!
 
-  portalsBought: [Portal!]! @derivedFrom(field: "buyer")
-
   portalsOwned: [Portal!]! @derivedFrom(field: "owner")
   portalsAmount: Int!
 
@@ -11,6 +9,7 @@ type Player @entity {
   gotchisOwnedAmount: Int!
 
   gotchisOriginalOwned: [Gotchi!]! @derivedFrom(field: "originalOwner")
+  gotchisOriginalOwnedAmount: Int!
 
   gotchisLentOut: [BigInt!]!
   gotchisLentOutAmount: Int!
@@ -20,8 +19,6 @@ type Player @entity {
 
   items: [ERC1155Item!] @derivedFrom(field: "owner")
   itemsAmount: Int!
-
-  # itemsAmount: Int!
 }
 
 type AavegotchiOption @entity {

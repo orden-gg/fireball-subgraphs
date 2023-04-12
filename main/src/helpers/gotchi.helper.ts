@@ -1,4 +1,4 @@
-import { Address, BigInt, ethereum, log } from '@graphprotocol/graph-ts';
+import { BigInt, ethereum, log } from '@graphprotocol/graph-ts';
 import { AavegotchiDiamond } from '../../generated/AavegotchiDiamond/AavegotchiDiamond';
 import { AavegotchiOption, Gotchi } from '../../generated/schema';
 import { loadOrCreatePlayer } from './player.helper';

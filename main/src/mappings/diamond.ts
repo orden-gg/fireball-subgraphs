@@ -4,13 +4,9 @@ import {
   AavegotchiDiamond__getItemTypeResultItemType_Struct,
   BuyPortals,
   ClaimAavegotchi,
-  GotchiLendingAdd,
   GotchiLendingAdded,
-  GotchiLendingCancel,
   GotchiLendingCanceled,
-  GotchiLendingEnd,
   GotchiLendingEnded,
-  GotchiLendingExecute,
   GotchiLendingExecuted,
   MintPortals,
   PortalOpened,
@@ -91,7 +87,7 @@ export function handleBuyPortals(event: BuyPortals): void {
     const id = baseId.plus(BigInt.fromI32(i));
     const portal = loadOrCreatePortal(id);
 
-    //Add portal hauntId
+    // Add portal hauntId
     const portalResponse = contract.try_getAavegotchi(id);
     if (!portalResponse.reverted) {
       portal.hauntId = portalResponse.value.hauntId;
@@ -149,14 +145,12 @@ export function handleClaimAavegotchi(event: ClaimAavegotchi): void {
   gotchi = updateGotchiInfo(gotchi, event.params._tokenId, event);
   gotchi.gotchiId = event.params._tokenId;
 
-  if (gotchi.originalOwner != null) {
-    const owner = loadOrCreatePlayer(Address.fromString(gotchi.originalOwner as string));
+  const owner = loadOrCreatePlayer(Address.fromString(gotchi.owner as string));
 
-    owner.portalsAmount = owner.portalsAmount - 1;
-    owner.gotchisOwnedAmount = owner.gotchisOwnedAmount + 1;
+  owner.portalsAmount = owner.portalsAmount - 1;
+  owner.gotchisOwnedAmount = owner.gotchisOwnedAmount + 1;
 
-    owner.save();
-  }
+  owner.save();
 
   portal.gotchi = gotchi.id;
   const zeroUser = loadOrCreatePlayer(Address.zero());
@@ -207,7 +201,7 @@ export function handleTransfer(event: Transfer): void {
 
   // ERC721 transfer can be portal or gotchi based, so we have to check it.
   if (gotchi != null) {
-    const isSucrefied = event.params._to === Address.zero();
+    const isSucrefied = event.params._to == Address.zero();
 
     if (isSucrefied) {
       const identity = removeClaimedIdentity(gotchi.id);
@@ -215,17 +209,17 @@ export function handleTransfer(event: Transfer): void {
       if (identity) {
         identity.save();
       }
-
-      oldOwner.gotchisOwnedAmount = oldOwner.gotchisOwnedAmount - 1;
     }
+
     if (!gotchi.modifiedRarityScore) {
       gotchi = updateGotchiInfo(gotchi, event.params._tokenId, event);
     }
+
+    newOwner.gotchisOwnedAmount = newOwner.gotchisOwnedAmount + 1;
+    oldOwner.gotchisOwnedAmount = oldOwner.gotchisOwnedAmount - 1;
+
     gotchi.owner = newOwner.id;
     gotchi.save();
-
-    oldOwner.gotchisOwnedAmount = oldOwner.gotchisOwnedAmount - 1;
-    newOwner.gotchisOwnedAmount = newOwner.gotchisOwnedAmount + 1;
 
     switchEquippedItems(gotchi.equippedWearables, event.params._from, event.params._to, event);
   } else {
@@ -269,7 +263,7 @@ export function handleTransferSingle(event: TransferSingle): void {
   const contract = AavegotchiDiamond.bind(event.address);
   const _itemType = contract.getItemType(event.params._id);
 
-  if (_itemType.category === ERC1155ItemCategoty.Badge) {
+  if (_itemType.category == ERC1155ItemCategoty.Badge) {
     log.warning('BADGE {}', [event.params._id.toString()]);
   } else {
     const oldOwner = loadOrCreatePlayer(event.params._from);
@@ -358,6 +352,7 @@ export function handleTransferToParent(event: TransferToParent): void {
 
   if (gotchi != null) {
     const _itemType = contract.getItemType(event.params._tokenTypeId);
+
     if (_itemType.category === ERC1155ItemCategoty.Badge) {
       const badges = gotchi.badges;
 
