@@ -1,5 +1,5 @@
 import { BigInt, dataSource, log } from '@graphprotocol/graph-ts';
-import { gotchiverse as RealmDiamond } from '../../generated/gotchiverse/gotchiverse';
+import { RealmDiamond } from '../../generated/RealmDiamond/RealmDiamond';
 import { Parcel } from '../../generated/schema';
 import { AlchemicaTypes } from '../shared/enums';
 
