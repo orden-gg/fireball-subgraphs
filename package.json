@@ -18,11 +18,11 @@
   "scripts": {
     "auth:stage": "dotenv -- cross-var graph auth --product hosted-service %SUBGRAPH_STAGE_API_KEY%",
     "auth:prod": "dotenv -- cross-var graph auth --product hosted-service %SUBGRAPH_PROD_API_KEY%",
-    "codegen:main": "graph codegen gotchi-main/subgraph.yaml -o gotchi-main/generated",
+    "codegen:main": "graph codegen main/subgraph.yaml -o main/generated",
     "codegen:verse": "graph codegen gotchiverse/subgraph.yaml -o gotchiverse/generated",
     "codegen:forge": "graph codegen forge/subgraph.yaml -o forge/generated",
-    "deploy:main:stage": "cd gotchi-main && graph deploy --product hosted-service dudendy/kratoman",
-    "deploy:main:prod": "cd gotchi-main && graph deploy --product hosted-service orden-gg/main",
+    "deploy:main:stage": "cd main && graph deploy --product hosted-service dudendy/kratoman",
+    "deploy:main:prod": "cd main && graph deploy --product hosted-service orden-gg/main",
     "deploy:verse:stage": "cd gotchiverse && graph deploy --product hosted-service dudendy/gotchiverse",
     "deploy:verse:prod": "cd gotchiverse && graph deploy --product hosted-service orden-gg/gotchiverse",
     "deploy:forge:stage": "cd forge && graph deploy --product hosted-service dudendy/forge"
