@@ -17,7 +17,7 @@ dataSources:
         - User
       abis:
         - name: AavegotchiDiamond
-          file: ../abis/diamond.abi.json
+          file: ../abis/aavegotchi.abi.json
       eventHandlers:
         - event: ERC721ListingAdd(indexed uint256,indexed address,address,uint256,indexed uint256,uint256)
           handler: handleERC721ListingAdd
@@ -27,13 +27,13 @@ dataSources:
           handler: handleERC721ListingCancelled
         - event: ERC721ListingRemoved(indexed uint256,uint256,uint256)
           handler: handleERC721ListingRemoved
-      file: ./src/mappings/diamond.ts
+      file: ./src/mappings/aavegotchi.ts
   - kind: ethereum/contract
-    name: gotchiverse
+    name: RealmDiamond
     network: matic
     source:
       address: '0x1d0360bac7299c86ec8e99d0c1c9a95fefaf2a11'
-      abi: gotchiverse
+      abi: RealmDiamond
       startBlock: 20667840 # contract creation
       #   startBlock: 28260500 # installations release
       #   startBlock: 32667840 # surveyrs release--c
@@ -49,7 +49,7 @@ dataSources:
         - Tile
         - Gotchi
       abis:
-        - name: gotchiverse
+        - name: RealmDiamond
           file: ../abis/realm.abi.json
       eventHandlers:
         - event: AlchemicaClaimed(indexed uint256,indexed uint256,indexed uint256,uint256,uint256,uint256)
@@ -74,4 +74,26 @@ dataSources:
           handler: handleEquipTile
         - event: UnequipTile(uint256,uint256,uint256,uint256)
           handler: handleUnequipTile
-      file: ./src/mappings/gotchiverse.ts
+      file: ./src/mappings/realm.ts
+  - kind: ethereum/contract
+    name: InstallationDiamond
+    network: matic
+    source:
+      address: '0x19f870bD94A34b3adAa9CaA439d333DA18d6812A'
+      abi: InstallationDiamond
+      startBlock: 26540483 # contract creation
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Player
+      abis:
+        - name: InstallationDiamond
+          file: ../abis/installation.abi.json
+      eventHandlers:
+        - event: UpgradeInitiated(indexed uint256,uint256,uint256,uint256,uint256,uint256)
+          handler: handleUpgradeInitiated
+        - event: UpgradeFinalized(indexed uint256,uint256,uint256,uint256)
+          handler: handleUpgradeFinalized
+      file: ./src/mappings/installation.ts
