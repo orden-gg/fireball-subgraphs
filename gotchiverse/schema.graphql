@@ -4,7 +4,10 @@ type Player @entity {
   parcels: [Parcel!]! @derivedFrom(field: "owner")
   parcelsCount: Int!
   installations: [Installation!]! @derivedFrom(field: "owner")
+  installationsCount: Int!
   tiles: [Tile!]! @derivedFrom(field: "owner")
+  tilesCount: Int!
+  parcelsVP: BigInt!
 }
 
 type Parcel @entity {

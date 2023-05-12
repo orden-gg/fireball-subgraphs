@@ -1,7 +1,7 @@
 import { BigInt, dataSource, log } from '@graphprotocol/graph-ts';
 import { RealmDiamond } from '../../generated/RealmDiamond/RealmDiamond';
 import { Parcel } from '../../generated/schema';
-import { AlchemicaTypes } from '../shared/enums';
+import { AlchemicaTypes, HAMBLE_VP, PARTNER_VP, ParcelTypes, REASONABLE_VP, SPACIOUS_VP } from '../shared';
 
 export const loadOrCreateParcel = (realmId: BigInt): Parcel => {
   const id = realmId.toString();
@@ -58,3 +58,20 @@ export const increaseCurrentSurvey = (alchemica: BigInt[], alchemicas: BigInt[])
 
   return currentAlchemica;
 };
+
+
+export function getParcelVPBySize(size: BigInt): BigInt {
+
+  switch (size.toI32()) {
+    case ParcelTypes.Humble:
+      return BigInt.fromI32(HAMBLE_VP)
+    case ParcelTypes.Reasonable: 
+      return BigInt.fromI32(REASONABLE_VP)
+    case ParcelTypes.SpaciousH || ParcelTypes.SpaciousV: 
+      return BigInt.fromI32(SPACIOUS_VP)
+    case ParcelTypes.Partner || ParcelTypes.Guardian: 
+      return BigInt.fromI32(PARTNER_VP)
+    default:
+      return BigInt.zero();
+  }
+}

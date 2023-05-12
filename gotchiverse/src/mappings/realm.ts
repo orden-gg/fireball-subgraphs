@@ -15,6 +15,7 @@ import {
 import {
   equipInstallation,
   equipTile,
+  getParcelVPBySize,
   increaseCurrentSurvey,
   loadOrCreateGotchi,
   loadOrCreateInstallation,
@@ -63,6 +64,10 @@ export function handleMintParcel(event: MinParcelEvent): void {
   parcel.owner = owner.toHexString();
   player.parcelsCount = player.parcelsCount + 1;
 
+  if (parcel.size) {
+    player.parcelsVP = player.parcelsVP.plus(getParcelVPBySize(parcel.size as BigInt));
+  }
+
   parcel.save();
   player.save();
 }
@@ -75,6 +80,11 @@ export function handleTransfer(event: TransferEvent): void {
   prevOwner.parcelsCount = prevOwner.parcelsCount - 1;
   nextOwner.parcelsCount = nextOwner.parcelsCount + 1;
   parcel.owner = event.params._to.toHexString();
+
+  if (parcel.size) {
+    prevOwner.parcelsVP = prevOwner.parcelsVP.minus(getParcelVPBySize(parcel.size as BigInt));
+    nextOwner.parcelsVP = nextOwner.parcelsVP.plus(getParcelVPBySize(parcel.size as BigInt));
+  }
 
   prevOwner.save();
   nextOwner.save();
