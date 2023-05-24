@@ -22,8 +22,8 @@ dataSources:
         - name: AavegotchiDiamond
           file: ../abis/aavegotchi.abi.json
       eventHandlers:
-        # - event: BuyPortals(indexed address,indexed address,uint256,uint256,uint256)
-        #   handler: handleBuyPortals
+        - event: BuyPortals(indexed address,indexed address,uint256,uint256,uint256)
+          handler: handleBuyPortals
         - event: TransferSingle(indexed address,indexed address,indexed address,uint256,uint256)
           handler: handleTransferSingle
         - event: TransferBatch(indexed address,indexed address,indexed address,uint256[],uint256[])
@@ -42,8 +42,8 @@ dataSources:
           handler: handleClaimAavegotchi
         - event: Transfer(indexed address,indexed address,indexed uint256)
           handler: handleTransfer
-        # - event: SpendSkillpoints(indexed uint256,int16[4])
-        #   handler: handleSpendSkillpoints
+        - event: SpendSkillpoints(indexed uint256,int16[4])
+          handler: handleSpendSkillpoints
         - event: GotchiLendingAdded(indexed uint32,indexed address,indexed uint32,uint96,uint32,uint8[3],address,address,uint32,address[],uint256)
           handler: handleGotchiLendingAdded
         - event: GotchiLendingExecuted(indexed uint32,indexed address,indexed address,uint32,uint96,uint32,uint8[3],address,address,uint32,address[],uint256)

@@ -304,10 +304,12 @@ export function handleTransferSingle(event: TransferSingle): void {
   const _itemType = contract.getItemType(event.params._id);
 
   if (_itemType.category == ERC1155ItemCategoty.Badge) {
-    log.warning('BADGE {}', [event.params._id.toString()]);
+    log.error('BADGE {}', [event.params._id.toString()]);
   } else {
     const oldOwner = loadOrCreatePlayer(event.params._from);
     const newOwner = loadOrCreatePlayer(event.params._to);
+
+    log.error('Category: {}, itemID: {}', [_itemType.category.toString(), event.params._id.toString()])
 
     const itemsVP = event.params._value.times(_itemType.ghstPrice);
     
