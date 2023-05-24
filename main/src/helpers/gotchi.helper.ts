@@ -52,12 +52,13 @@ export function updateGotchiInfo(gotchi: Gotchi, id: BigInt, event: ethereum.Eve
 
     if (!gotchi.originalOwner) {
       gotchi.originalOwner = owner.id;
-    }
+    }``
 
     gotchi.collateral = gotchiInfo.collateral;
     gotchi.hauntId = gotchiInfo.hauntId;
     gotchi.numericTraits = gotchiInfo.numericTraits;
     gotchi.modifiedRarityScore = gotchiInfo.modifiedRarityScore;
+    gotchi.baseRarityScore = gotchiInfo.baseRarityScore;
     gotchi.equippedWearables = gotchiInfo.equippedWearables;
   } else {
     log.warning("Aavegotchi {} couldn't be updated at block: {} tx_hash: {}", [

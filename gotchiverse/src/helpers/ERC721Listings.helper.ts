@@ -22,10 +22,10 @@ export function updateERC721ListingInfo(
   event: ethereum.Event
 ): ERC721Listing {
   const contract = AavegotchiDiamond.bind(event.address);
-  const response = contract.try_getERC721Listing(listingID);
+  const _response = contract.try_getERC721Listing(listingID);
 
-  if (!response.reverted) {
-    const listingInfo = response.value;
+  if (!_response.reverted) {
+    const listingInfo = _response.value;
     listing.category = listingInfo.category;
     listing.erc721TokenAddress = listingInfo.erc721TokenAddress;
     listing.tokenId = listingInfo.erc721TokenId;

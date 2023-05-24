@@ -16,6 +16,7 @@ export function loadOrCreateItem(
     item.amount = 0;
     item.owner = owner.toHexString();
     item.equipped = 0;
+    item.equippedGotchis = [];
 
     if (category !== -1) {
       item.category = category;
@@ -38,35 +39,95 @@ export function isItemCreated(tokenId: BigInt, owner: Address): boolean {
 export function switchEquippedItems(
   // @ts-ignore
   equippedItems: i32[],
+  // @ts-ignore
+  gotchiId: i32,
   oldOwner: Address,
   newOwner: Address,
   event: ethereum.Event
 ): void {
-  for (let index = 0; index < equippedItems.length; index++) {
-    const tokenIdNumber = equippedItems[index];
+  const equippedWearables = getEquipedIds(equippedItems);
 
-    if (tokenIdNumber !== 0) {
-      const tokenId = BigInt.fromI32(tokenIdNumber);
-      const isCreated = isItemCreated(tokenId, oldOwner) && isItemCreated(tokenId, newOwner);
-      let oldOwnerItem: ERC1155Item | null = null;
-      let newOwnerItem: ERC1155Item | null = null;
+  for (let index = 0; index < equippedWearables.length; index++) {
+    const tokenId = BigInt.fromI32(equippedItems[index]);
+    const isCreated = isItemCreated(tokenId, oldOwner) && isItemCreated(tokenId, newOwner);
+    let oldOwnerItem: ERC1155Item | null = null;
+    let newOwnerItem: ERC1155Item | null = null;
 
-      if (isCreated) {
-        oldOwnerItem = loadOrCreateItem(tokenId, oldOwner, -1);
-        newOwnerItem = loadOrCreateItem(tokenId, oldOwner, -1);
-      } else {
-        const contract = AavegotchiDiamond.bind(event.address);
-        const _itemType = contract.getItemType(tokenId);
+    if (isCreated) {
+      oldOwnerItem = loadOrCreateItem(tokenId, oldOwner, -1);
+      newOwnerItem = loadOrCreateItem(tokenId, newOwner, -1);
+    } else {
+      const contract = AavegotchiDiamond.bind(event.address);
+      const _itemType = contract.getItemType(tokenId);
 
-        oldOwnerItem = loadOrCreateItem(tokenId, oldOwner, _itemType.category);
-        newOwnerItem = loadOrCreateItem(tokenId, oldOwner, _itemType.category);
-      }
+      oldOwnerItem = loadOrCreateItem(tokenId, oldOwner, _itemType.category);
+      newOwnerItem = loadOrCreateItem(tokenId, newOwner, _itemType.category);
+    }
 
-      oldOwnerItem.equipped = oldOwnerItem.equipped - 1;
-      newOwnerItem.equipped = newOwnerItem.equipped + 1;
+    oldOwnerItem.equipped = oldOwnerItem.equipped - 1;
 
-      oldOwnerItem.save();
-      newOwnerItem.save();
+    if (oldOwnerItem.equipped == 0) {
+      oldOwnerItem.equippedGotchis = removeGotchiId(gotchiId, oldOwnerItem.equippedGotchis);
+    }
+
+    if (newOwnerItem.equipped == 0) {
+      newOwnerItem.equippedGotchis = addGotchiId(gotchiId, newOwnerItem.equippedGotchis);
+    }
+
+    newOwnerItem.equipped = newOwnerItem.equipped + 1;
+    
+    oldOwnerItem.save();
+    newOwnerItem.save();
+  }
+}
+
+// @ts-ignore
+export function removeGotchiId(gotchiId: i32, gotchisIds: i32[]): i32[] {
+  // @ts-ignore
+  const result: i32[] = [];
+
+  for (let index = 0; index < gotchisIds.length; index++) {
+    const id = gotchisIds[index];
+    if (id != gotchiId) {
+      result.push(id);
     }
   }
+
+  return result;
+}
+
+// @ts-ignore
+export function addGotchiId(gotchiId: i32, gotchisIds: i32[]): i32[] {
+  // @ts-ignore
+  const result: i32[] = gotchisIds;
+  // let isAlreadyAdded = false;
+
+  // for (let index = 0; index < gotchisIds.length; index++) {
+  //   const id = gotchisIds[index];
+
+  //   if (id == gotchiId) {
+  //     isAlreadyAdded = true;
+  //   }
+  // }
+
+  // if (!isAlreadyAdded) {
+  result.push(gotchiId);
+  // }
+
+  return result;
+}
+
+// @ts-ignore
+export function getEquipedIds(equippedWearables: i32[]): i32[] {
+  // @ts-ignore
+  const result: i32[] = [];
+
+  for (let index = 0; index < equippedWearables.length; index++) {
+    const tokenId = equippedWearables[index];
+    if (tokenId != 0) {
+      result.push(tokenId);
+    }
+  }
+
+  return result;
 }

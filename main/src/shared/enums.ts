@@ -12,3 +12,13 @@ export enum TraitsNumberTypes {
   EYS,
   EYC
 }
+
+
+export enum WearableTypes {
+  Common,
+  Uncommon,
+  Rare,
+  Legendary,
+  Mythical,
+  Godlike
+}

@@ -2,6 +2,10 @@ type Player @entity {
   "player address"
   id: ID!
 
+  gotchisVP: BigInt!
+  itemsVP: BigInt!
+  portalsVP: BigInt!
+
   portalsOwned: [Portal!]! @derivedFrom(field: "owner")
   portalsAmount: Int!
 
@@ -9,6 +13,7 @@ type Player @entity {
   gotchisOwnedAmount: Int!
 
   gotchisOriginalOwned: [Gotchi!]! @derivedFrom(field: "originalOwner")
+  # not corect amount
   gotchisOriginalOwnedAmount: Int!
 
   gotchisLentOut: [BigInt!]!
@@ -18,6 +23,7 @@ type Player @entity {
   gotchisBorrowedAmount: Int!
 
   items: [ERC1155Item!] @derivedFrom(field: "owner")
+  # not corect amount
   itemsAmount: Int!
 }
 
@@ -42,6 +48,8 @@ type Gotchi @entity {
   portal: Portal! @derivedFrom(field: "gotchi")
   usedSkillPoints: BigInt!
   availableSkillPoints: BigInt!
+  baseRarityScore: BigInt!
+  modifiedRarityScore: BigInt!
   badges: [Int!]!
   collateral: Bytes!
   numericTraits: [Int!]!
@@ -52,8 +60,6 @@ type Gotchi @entity {
 
   lending: BigInt
 
-  # Can be removed in future;
-  modifiedRarityScore: BigInt!
 }
 
 type Identity @entity {
@@ -92,4 +98,5 @@ type ERC1155Item @entity {
 
   category: Int!
   equipped: Int!
+  equippedGotchis: [Int!]!
 }
