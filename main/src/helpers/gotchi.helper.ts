@@ -52,7 +52,7 @@ export function updateGotchiInfo(gotchi: Gotchi, id: BigInt, event: ethereum.Eve
 
     if (!gotchi.originalOwner) {
       gotchi.originalOwner = owner.id;
-    }``
+    }
 
     gotchi.collateral = gotchiInfo.collateral;
     gotchi.hauntId = gotchiInfo.hauntId;
