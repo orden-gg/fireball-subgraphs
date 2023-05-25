@@ -1,6 +1,7 @@
 import { ERC1155Item } from '../../generated/schema';
 import { Address, BigInt, ethereum } from '@graphprotocol/graph-ts';
 import { AavegotchiDiamond } from '../../generated/AavegotchiDiamond/AavegotchiDiamond';
+import { loadOrCreatePlayer } from './player.helper';
 
 export function loadOrCreateItem(
   tokenId: BigInt,
@@ -41,30 +42,29 @@ export function switchEquippedItems(
   equippedItems: i32[],
   // @ts-ignore
   gotchiId: i32,
-  oldOwner: Address,
-  newOwner: Address,
+  oldOwnerAddress: Address,
+  newOwnerAddress: Address,
   event: ethereum.Event
 ): void {
   const equippedWearables = getEquipedIds(equippedItems);
+  let oldOwner = loadOrCreatePlayer(oldOwnerAddress);
+  let newOwner = loadOrCreatePlayer(newOwnerAddress);
 
   for (let index = 0; index < equippedWearables.length; index++) {
     const tokenId = BigInt.fromI32(equippedItems[index]);
-    const isCreated = isItemCreated(tokenId, oldOwner) && isItemCreated(tokenId, newOwner);
     let oldOwnerItem: ERC1155Item | null = null;
     let newOwnerItem: ERC1155Item | null = null;
 
-    if (isCreated) {
-      oldOwnerItem = loadOrCreateItem(tokenId, oldOwner, -1);
-      newOwnerItem = loadOrCreateItem(tokenId, newOwner, -1);
-    } else {
-      const contract = AavegotchiDiamond.bind(event.address);
-      const _itemType = contract.getItemType(tokenId);
+    const contract = AavegotchiDiamond.bind(event.address);
+    const _itemType = contract.getItemType(tokenId);
 
-      oldOwnerItem = loadOrCreateItem(tokenId, oldOwner, _itemType.category);
-      newOwnerItem = loadOrCreateItem(tokenId, newOwner, _itemType.category);
-    }
+    oldOwnerItem = loadOrCreateItem(tokenId, oldOwnerAddress, _itemType.category);
+    newOwnerItem = loadOrCreateItem(tokenId, newOwnerAddress, _itemType.category);
 
     oldOwnerItem.equipped = oldOwnerItem.equipped - 1;
+
+    oldOwner.itemsVP = oldOwner.itemsVP.minus(_itemType.ghstPrice);
+    newOwner.itemsVP = newOwner.itemsVP.plus(_itemType.ghstPrice);
 
     if (oldOwnerItem.equipped == 0) {
       oldOwnerItem.equippedGotchis = removeGotchiId(gotchiId, oldOwnerItem.equippedGotchis);
@@ -75,10 +75,13 @@ export function switchEquippedItems(
     }
 
     newOwnerItem.equipped = newOwnerItem.equipped + 1;
-    
+
     oldOwnerItem.save();
     newOwnerItem.save();
   }
+
+  oldOwner.save();
+  newOwner.save();
 }
 
 // @ts-ignore

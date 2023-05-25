@@ -87,9 +87,8 @@ export function handleBuyPortals(event: BuyPortals): void {
   buyer.portalsAmount = buyer.portalsAmount - 1;
   owner.portalsAmount = owner.portalsAmount + 1;
 
-  buyer.portalsVP = buyer.portalsVP.minus(PORTAL_VP)
-  owner.portalsVP = owner.portalsVP.plus(PORTAL_VP)
-
+  buyer.portalsVP = buyer.portalsVP.minus(PORTAL_VP);
+  owner.portalsVP = owner.portalsVP.plus(PORTAL_VP);
 
   for (let i = 0; i < event.params._numAavegotchisToPurchase.toI32(); i++) {
     const id = baseId.plus(BigInt.fromI32(i));
@@ -116,7 +115,7 @@ export function handleBuyPortals(event: BuyPortals): void {
 export function handlePortalOpened(event: PortalOpened): void {
   const contract = AavegotchiDiamond.bind(event.address);
   const portal = loadOrCreatePortal(event.params.tokenId);
-  
+
   const _traitsResponse = contract.try_portalAavegotchiTraits(event.params.tokenId);
 
   if (!_traitsResponse.reverted) {
@@ -214,8 +213,8 @@ export function handleSpendSkillpoints(event: SpendSkillpoints): void {
 
 export function handleTransfer(event: Transfer): void {
   const id = event.params._tokenId;
-  const oldOwner = loadOrCreatePlayer(event.params._from);
-  const newOwner = loadOrCreatePlayer(event.params._to);
+  let oldOwner = loadOrCreatePlayer(event.params._from);
+  let newOwner = loadOrCreatePlayer(event.params._to);
   const portal = loadOrCreatePortal(id, false);
   let gotchi = loadOrCreateGotchi(id, false);
 
@@ -235,15 +234,26 @@ export function handleTransfer(event: Transfer): void {
       gotchi = updateGotchiInfo(gotchi, event.params._tokenId, event);
     }
 
-    oldOwner.gotchisOwnedAmount = oldOwner.gotchisOwnedAmount - 1;
-    newOwner.gotchisOwnedAmount = newOwner.gotchisOwnedAmount + 1;
-
     if (!gotchi.lending) {
       // @ts-ignore
-      switchEquippedItems(gotchi.equippedWearables, BigInt.fromString(gotchi.id).toI32(), event.params._from, event.params._to, event);
+      switchEquippedItems(
+        gotchi.equippedWearables,
+        BigInt.fromString(gotchi.id).toI32(),
+        event.params._from,
+        event.params._to,
+        event
+      );
+
+      oldOwner = loadOrCreatePlayer(event.params._from);
+      newOwner = loadOrCreatePlayer(event.params._to);
 
       gotchi.originalOwner = newOwner.id;
-      
+
+      const itemsAmount = getEquipedIds(gotchi.equippedWearables).length;
+
+      oldOwner.itemsAmount = oldOwner.itemsAmount - itemsAmount;
+      newOwner.itemsAmount = newOwner.itemsAmount + itemsAmount;
+
       oldOwner.gotchisOriginalOwnedAmount = oldOwner.gotchisOriginalOwnedAmount - 1;
       newOwner.gotchisOriginalOwnedAmount = newOwner.gotchisOriginalOwnedAmount + 1;
 
@@ -251,9 +261,11 @@ export function handleTransfer(event: Transfer): void {
       newOwner.gotchisVP = newOwner.gotchisVP.plus(gotchi.baseRarityScore);
     }
 
+    oldOwner.gotchisOwnedAmount = oldOwner.gotchisOwnedAmount - 1;
+    newOwner.gotchisOwnedAmount = newOwner.gotchisOwnedAmount + 1;
+
     gotchi.owner = newOwner.id;
     gotchi.save();
-
   } else {
     portal.owner = newOwner.id;
     portal.save();
@@ -304,7 +316,7 @@ export function handleTransferSingle(event: TransferSingle): void {
     const newOwner = loadOrCreatePlayer(event.params._to);
 
     const itemsVP = event.params._value.times(_itemType.ghstPrice);
-    
+
     oldOwner.itemsVP = oldOwner.itemsVP.minus(itemsVP);
     newOwner.itemsVP = newOwner.itemsVP.plus(itemsVP);
 
@@ -318,21 +330,24 @@ export function handleTransferSingle(event: TransferSingle): void {
     wearableFrom.save();
     wearableTo.save();
 
-    log.error(`
+    log.error(
+      `
       From Event: {},
       Category: {}, 
       itemID: {}, 
       amount: {}, 
       from was/has: {},
       to was/has: {}
-    `, [
-      'handleTransferSingle',
-      _itemType.category.toString(), 
-      event.params._id.toString(),
-      amount.toString(),
-      `${oldOwner.itemsAmount}/${oldOwner.itemsAmount - amount}`,
-      `${newOwner.itemsAmount}/${newOwner.itemsAmount + amount}`
-    ])
+    `,
+      [
+        'handleTransferSingle',
+        _itemType.category.toString(),
+        event.params._id.toString(),
+        amount.toString(),
+        `${oldOwner.itemsAmount}/${oldOwner.itemsAmount - amount}`,
+        `${newOwner.itemsAmount}/${newOwner.itemsAmount + amount}`
+      ]
+    );
 
     oldOwner.itemsAmount = oldOwner.itemsAmount - amount;
     newOwner.itemsAmount = newOwner.itemsAmount + amount;
@@ -357,27 +372,32 @@ export function handleTransferBatch(event: TransferBatch): void {
       const wearableTo = loadOrCreateItem(event.params._ids[i], event.params._to, _itemType.category);
 
       const itemsVP = event.params._values[i].times(_itemType.ghstPrice);
-    
+
       oldOwner.itemsVP = oldOwner.itemsVP.minus(itemsVP);
       newOwner.itemsVP = newOwner.itemsVP.plus(itemsVP);
-      
+
       const amount = event.params._values[i].toI32();
 
-      log.error(`
+      log.error(
+        `
           From Event: {},
           Category: {}, 
           itemID: {}, 
           amount: {}, 
           from was/has: {},
-          to was/has: {}
-        `, [
+          to was/has: {},
+          from address: {}
+        `,
+        [
           'handleTransferBatch',
-          _itemType.category.toString(), 
+          _itemType.category.toString(),
           event.params._ids[i].toString(),
           amount.toString(),
           `${oldOwner.itemsAmount}/${oldOwner.itemsAmount - amount}`,
-          `${newOwner.itemsAmount}/${newOwner.itemsAmount + amount}`
-        ])
+          `${newOwner.itemsAmount}/${newOwner.itemsAmount + amount}`,
+          event.params._from.toHexString()
+        ]
+      );
 
       wearableFrom.amount = wearableFrom.amount - amount;
       wearableTo.amount = wearableTo.amount + amount;
@@ -417,11 +437,12 @@ export function handleTransferFromParent(event: TransferFromParent): void {
     const value = event.params._value.toI32();
 
     item.equipped = item.equipped - value;
+    item.amount = item.amount + value;
 
     if (item.equipped == 0) {
       item.equippedGotchis = removeGotchiId(BigInt.fromString(gotchi.id).toI32(), item.equippedGotchis);
     }
-    
+
     owner.save();
     item.save();
   }
@@ -475,7 +496,7 @@ export function handleGotchiLendingExecuted(event: GotchiLendingExecuted): void 
   if (event.block.number.le(BLOCK_DISABLE_OLD_LENDING_EVENTS)) {
     return;
   }
-  
+
   const gotchi = loadOrCreateGotchi(event.params.tokenId)!;
 
   const lender = addLetOutGotchi(event.params.lender, event.params.tokenId);
@@ -492,9 +513,6 @@ export function handleGotchiLendingExecuted(event: GotchiLendingExecuted): void 
   gotchi.originalOwner = lender.id;
   gotchi.lending = event.params.listingId;
   gotchi.save();
-
-
-  // switchEquippedItems(gotchi.equippedWearables, event.params.borrower, event.params.lender, event);
 }
 
 export function handleGotchiLendingCanceled(event: GotchiLendingCanceled): void {
@@ -520,10 +538,7 @@ export function handleGotchiLendingEnded(event: GotchiLendingEnded): void {
   borrower.gotchisVP = borrower.gotchisVP.plus(gotchi.baseRarityScore);
   borrower.save();
 
-  
   gotchi.lending = null;
   gotchi.originalOwner = lender.id;
   gotchi.save();
-
-  // switchEquippedItems(gotchi.equippedWearables, event.params.lender, event.params.borrower, event);
 }
