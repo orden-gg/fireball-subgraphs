@@ -1,11 +1,52 @@
-import { ItemSmelted as ItemSmeltedEvent } from '../../generated/ForgeDiamond/ForgeDiamond';
-import { ForgeItem } from '../../generated/schema';
+import { TransferBatch, TransferSingle } from '../../generated/ForgeDiamond/ForgeDiamond';
+import {
+  isCore,
+  isGeode,
+  updateAlloyTransfer,
+  updateCoreTransfer,
+  updateEssenceTransfer,
+  updateGeodeTransfer,
+  updateSchematicTransfer
+} from '../helpers';
+import { ALLOY, ESSENCE } from '../constants';
 
-export function handleItemSmelted(event: ItemSmeltedEvent): void {
-  const item = new ForgeItem(event.transaction.hash.toHexString());
+export function handleTransferSingle(event: TransferSingle): void {
+  const amount = event.params.value;
+  const id = event.params.id.toI32();
+  const from = event.params.from;
+  const to = event.params.to;
 
-  item.gotchiId = event.params.gotchiId.toString();
-  item.itemId = event.params.itemId.toString();
+  if (id == ALLOY) {
+    updateAlloyTransfer(id, amount, from, to);
+  } else if (id == ESSENCE) {
+    updateEssenceTransfer(id, amount, from, to);
+  } else if (isGeode(id)) {
+    updateGeodeTransfer(id, amount, from, to);
+  } else if (isCore(id)) {
+    updateCoreTransfer(id, amount, from, to);
+  } else {
+    updateSchematicTransfer(id, amount, from, to);
+  }
+}
 
-  item.save();
+export function handleTransferBatch(event: TransferBatch): void {
+  for (let i = 0; i < event.params.ids.length; i++) {
+    const amount = event.params.values[i];
+
+    const id = event.params.ids[i].toI32();
+    const from = event.params.from;
+    const to = event.params.to;
+
+    if (id == ALLOY) {
+      updateAlloyTransfer(id, amount, from, to);
+    } else if (id == ESSENCE) {
+      updateEssenceTransfer(id, amount, from, to);
+    } else if (isGeode(id)) {
+      updateGeodeTransfer(id, amount, from, to);
+    } else if (isCore(id)) {
+      updateCoreTransfer(id, amount, from, to);
+    } else {
+      updateSchematicTransfer(id, amount, from, to);
+    }
+  }
 }

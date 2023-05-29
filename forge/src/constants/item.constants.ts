@@ -1,0 +1,90 @@
+import { BigInt } from '@graphprotocol/graph-ts';
+
+export const WEARABLES_SLOTS = 6;
+export const WEARABLES_RARITIES = 6;
+
+export const WEARABLE_GAP_OFFSET = 1000000000;
+
+export const ALLOY = WEARABLE_GAP_OFFSET + 0;
+export const ESSENCE = WEARABLE_GAP_OFFSET + 1;
+
+export const GEODE_INDEX_START = WEARABLE_GAP_OFFSET + 2;
+export const GEODE_INDEX_END = WEARABLE_GAP_OFFSET + 7;
+
+export const GEODE_COMMON = WEARABLE_GAP_OFFSET + 2;
+export const GEODE_UNCOMMON = WEARABLE_GAP_OFFSET + 3;
+export const GEODE_RARE = WEARABLE_GAP_OFFSET + 4;
+export const GEODE_LEGENDARY = WEARABLE_GAP_OFFSET + 5;
+export const GEODE_MYTHICAL = WEARABLE_GAP_OFFSET + 6;
+export const GEODE_GODLIKE = WEARABLE_GAP_OFFSET + 7;
+
+export const CORE_INDEX_START = WEARABLE_GAP_OFFSET + 8;
+export const CORE_INDEX_END = WEARABLE_GAP_OFFSET + 43;
+
+export const CORE_BODY_COMMON = WEARABLE_GAP_OFFSET + 8;
+export const CORE_BODY_UNCOMMON = WEARABLE_GAP_OFFSET + 9;
+export const CORE_BODY_RARE = WEARABLE_GAP_OFFSET + 10;
+export const CORE_BODY_LEGENDARY = WEARABLE_GAP_OFFSET + 11;
+export const CORE_BODY_MYTHICAL = WEARABLE_GAP_OFFSET + 12;
+export const CORE_BODY_GODLIKE = WEARABLE_GAP_OFFSET + 13;
+
+export const CORE_FACE_COMMON = WEARABLE_GAP_OFFSET + 14;
+export const CORE_FACE_UNCOMMON = WEARABLE_GAP_OFFSET + 15;
+export const CORE_FACE_RARE = WEARABLE_GAP_OFFSET + 16;
+export const CORE_FACE_LEGENDARY = WEARABLE_GAP_OFFSET + 17;
+export const CORE_FACE_MYTHICAL = WEARABLE_GAP_OFFSET + 18;
+export const CORE_FACE_GODLIKE = WEARABLE_GAP_OFFSET + 19;
+
+export const CORE_EYES_COMMON = WEARABLE_GAP_OFFSET + 20;
+export const CORE_EYES_UNCOMMON = WEARABLE_GAP_OFFSET + 21;
+export const CORE_EYES_RARE = WEARABLE_GAP_OFFSET + 22;
+export const CORE_EYES_LEGENDARY = WEARABLE_GAP_OFFSET + 23;
+export const CORE_EYES_MYTHICAL = WEARABLE_GAP_OFFSET + 24;
+export const CORE_EYES_GODLIKE = WEARABLE_GAP_OFFSET + 25;
+
+export const CORE_HEAD_COMMON = WEARABLE_GAP_OFFSET + 26;
+export const CORE_HEAD_UNCOMMON = WEARABLE_GAP_OFFSET + 27;
+export const CORE_HEAD_RARE = WEARABLE_GAP_OFFSET + 28;
+export const CORE_HEAD_LEGENDARY = WEARABLE_GAP_OFFSET + 29;
+export const CORE_HEAD_MYTHICAL = WEARABLE_GAP_OFFSET + 30;
+export const CORE_HEAD_GODLIKE = WEARABLE_GAP_OFFSET + 31;
+
+export const CORE_HANDS_COMMON = WEARABLE_GAP_OFFSET + 32;
+export const CORE_HANDS_UNCOMMON = WEARABLE_GAP_OFFSET + 33;
+export const CORE_HANDS_RARE = WEARABLE_GAP_OFFSET + 34;
+export const CORE_HANDS_LEGENDARY = WEARABLE_GAP_OFFSET + 35;
+export const CORE_HANDS_MYTHICAL = WEARABLE_GAP_OFFSET + 36;
+export const CORE_HANDS_GODLIKE = WEARABLE_GAP_OFFSET + 37;
+
+export const CORE_PET_COMMON = WEARABLE_GAP_OFFSET + 38;
+export const CORE_PET_UNCOMMON = WEARABLE_GAP_OFFSET + 39;
+export const CORE_PET_RARE = WEARABLE_GAP_OFFSET + 40;
+export const CORE_PET_LEGENDARY = WEARABLE_GAP_OFFSET + 41;
+export const CORE_PET_MYTHICAL = WEARABLE_GAP_OFFSET + 42;
+export const CORE_PET_GODLIKE = WEARABLE_GAP_OFFSET + 43;
+
+export const ALLOY_CATEGORY = 'alloy';
+export const CORE_CATEGORY = 'core';
+export const ESSENCE_CATEGORY = 'essence';
+export const GEODE_CATEGORY = 'geode';
+export const SCHEMATIC_CATEGORY = 'schematic';
+
+export const COMMON_RARITY = 'common';
+export const UNCOMMON_RARITY = 'uncommon';
+export const RARE_RARITY = 'rare';
+export const LEGENDARY_RARITY = 'legendary';
+export const MYTHICAL_RARITY = 'mythical';
+export const GODLIKE_RARITY = 'godlike';
+
+export const BODY_SLOT = 'body';
+export const FACE_SLOT = 'face';
+export const EYES_SLOT = 'eyes';
+export const HEAD_SLOT = 'head';
+export const HANDS_SLOT = 'hands';
+
+export const COMMON_SCORE = 1;
+export const UNCOMMON_SCORE = 2;
+export const RARE_SCORE = 5;
+export const LEGENDARY_SCORE = 10;
+export const MYTHICAL_SCORE = 20;
+export const GODLIKE_SCORE = 50;

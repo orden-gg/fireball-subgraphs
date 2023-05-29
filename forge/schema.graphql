@@ -1,11 +1,49 @@
 type Player @entity {
   "player address"
   id: ID!
+
+  alloyAmount: BigInt!
+  essenceAmount: BigInt!
+
+  commonGeodeAmount: BigInt!
+  uncommonGeodeAmount: BigInt!
+  rareGeodeAmount: BigInt!
+  legendaryGeodeAmount: BigInt!
+  mythicalGeodeAmount: BigInt!
+  godlikeGeodeAmount: BigInt!
+
+  commonCoreAmount: BigInt!
+  uncommonCoreAmount: BigInt!
+  rareCoreAmount: BigInt!
+  legendaryCoreAmount: BigInt!
+  mythicalCoreAmount: BigInt!
+  godlikeCoreAmount: BigInt!
+
+  commonSchematicAmount: BigInt!
+  uncommonSchematicAmount: BigInt!
+  rareSchematicAmount: BigInt!
+  legendarySchematicAmount: BigInt!
+  mythicalSchematicAmount: BigInt!
+  godlikeSchematicAmount: BigInt!
+
+  forgeItems: [ForgeItem!]
+}
+
+enum ForgeTypes {
+  essence
+  alloy
+  schematic
+  core
+  geode
 }
 
 type ForgeItem @entity {
-  "player address"
+  # forge item id + owner address
   id: ID!
-  itemId: String!
-  gotchiId: String!
+  tokenId: Int!
+  amount: BigInt!
+  category: ForgeTypes!
+  owner: Bytes
+  rarity: String
+  slot: String
 }
