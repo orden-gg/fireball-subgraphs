@@ -1,4 +1,4 @@
-import { Address, BigInt, log } from '@graphprotocol/graph-ts';
+import { Address, BigInt } from '@graphprotocol/graph-ts';
 import { ForgeTypes } from '../enums';
 import { getCategoryName, loadOrCreateItem } from './item.helper';
 import { loadOrCreatePlayer } from './player.helper';
@@ -39,16 +39,6 @@ export function updateGeodeTransfer(id: i32, amount: BigInt, from: Address, to: 
   itemTo.amount = itemTo.amount.plus(amount);
   itemTo.owner = to;
   itemTo.save();
-
-  log.error(
-    `
-    id: {},
-    category: {},
-    rarity: {},
-    amount: {}
-  `,
-    [id.toString(), category.toString(), rarity ? rarity : 'null', amount.toString()]
-  );
 }
 
 // @ts-ignore

@@ -1,10 +1,11 @@
-import { Address, BigInt, log } from '@graphprotocol/graph-ts';
+import { Address, BigInt } from '@graphprotocol/graph-ts';
 import { ForgeTypes, RartyTypes, SlotTypes } from '../enums';
 import { getCategoryName, loadOrCreateItem } from './item.helper';
 import { loadOrCreatePlayer } from './player.helper';
 import {
   BODY_SLOT,
   COMMON_RARITY,
+  CORE_BODY_COMMON,
   CORE_INDEX_END,
   CORE_INDEX_START,
   EYES_SLOT,
@@ -15,6 +16,7 @@ import {
   HEAD_SLOT,
   LEGENDARY_RARITY,
   MYTHICAL_RARITY,
+  PET_SLOT,
   RARE_RARITY,
   UNCOMMON_RARITY
 } from '../constants';
@@ -42,29 +44,11 @@ export function updateCoreTransfer(id: i32, amount: BigInt, from: Address, to: A
   itemTo.amount = itemTo.amount.plus(amount);
   itemTo.owner = to;
   itemTo.save();
-
-  log.error(
-    `
-    id: {},
-    category: {},
-    rarity: {},
-    slot: {},
-    amount: {}
-  `,
-    [id.toString(), category.toString(), rarity ? rarity : 'null', slot ? slot : 'null', amount.toString()]
-  );
 }
 
 // @ts-ignore
 function getCoreRarity(id: i32): string {
-  let rarityId = 0;
-
-  for (let index = rarityId; index <= id - GEODE_INDEX_END; ++index) {
-    ++rarityId;
-    if (rarityId == 5) {
-      rarityId = 0;
-    }
-  }
+  let rarityId = (id - CORE_BODY_COMMON) % 6;
 
   switch (rarityId) {
     case RartyTypes.Common:
@@ -100,6 +84,8 @@ export function getCoreSlot(id: i32): string {
       return HEAD_SLOT;
     case SlotTypes.Hands:
       return HANDS_SLOT;
+    case SlotTypes.Pet:
+      return PET_SLOT;
     default:
       return 'unknown';
   }

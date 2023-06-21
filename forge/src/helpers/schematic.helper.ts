@@ -15,66 +15,95 @@ import {
   RARE_SCORE,
   RARE_RARITY,
   UNCOMMON_SCORE,
-  UNCOMMON_RARITY
+  UNCOMMON_RARITY,
+  WEARABLE_SLOTS
 } from '../constants';
 import { MainDiamond } from '../../generated/ForgeDiamond/MainDiamond';
 
 // @ts-ignore
 export function updateSchematicTransfer(id: i32, amount: BigInt, from: Address, to: Address): void {
   const category = getCategoryName(ForgeTypes.Schematic);
-  const rarity = getSchematicRarity(id);
-
-  setOwnersSchematicAmount(from, to, rarity, amount);
-
-  const itemFrom = loadOrCreateItem(id, ForgeTypes.Schematic, from);
-  itemFrom.category = category;
-  itemFrom.amount = itemFrom.amount.minus(amount);
-  itemFrom.owner = from;
-  itemFrom.save();
-
-  const itemTo = loadOrCreateItem(id, ForgeTypes.Schematic, to);
-  itemTo.category = category;
-  itemTo.amount = itemTo.amount.plus(amount);
-  itemTo.owner = to;
-  itemTo.save();
-
-  log.error(
-    `
-    id: {},
-    category: {},
-    rarity: {},
-    amount: {}
-  `,
-    [id.toString(), category.toString(), rarity, amount.toString()]
-  );
-}
-
-// @ts-ignore
-function getSchematicRarity(id: i32): string {
   const contract = MainDiamond.bind(MAIN_CONTRACT);
   const _response = contract.try_getItemType(BigInt.fromI32(id));
-  let result = '';
+
+  let rarity: string | null = null;
+  let slot: string | null = null;
+
+  // log.error('SCHEMATIC ITEM ID: {}', [id.toString()]);
 
   if (!_response.reverted) {
     const _itemType = _response.value;
 
-    if (_itemType.rarityScoreModifier == COMMON_SCORE) {
-      result = COMMON_RARITY;
-    } else if (_itemType.rarityScoreModifier == UNCOMMON_SCORE) {
-      result = UNCOMMON_RARITY;
-    } else if (_itemType.rarityScoreModifier == RARE_SCORE) {
-      result = RARE_RARITY;
-    } else if (_itemType.rarityScoreModifier == LEGENDARY_SCORE) {
-      result = LEGENDARY_RARITY;
-    } else if (_itemType.rarityScoreModifier == MYTHICAL_SCORE) {
-      result = MYTHICAL_RARITY;
-    } else if (_itemType.rarityScoreModifier == GODLIKE_SCORE) {
-      result = GODLIKE_RARITY;
-    } else {
-      result = 'unknown';
+    rarity = getSchematicRarity(_itemType.rarityScoreModifier);
+
+    slot = getSchematicSlots(_itemType.slotPositions);
+
+    if (!slot) {
+      log.error('slot positons: [{},{},{},{},{},{},{},{},{},{},{},{}]', [
+        _itemType.slotPositions[0] ? 'true' : 'false',
+        _itemType.slotPositions[1] ? 'true' : 'false',
+        _itemType.slotPositions[2] ? 'true' : 'false',
+        _itemType.slotPositions[3] ? 'true' : 'false',
+        _itemType.slotPositions[4] ? 'true' : 'false',
+        _itemType.slotPositions[5] ? 'true' : 'false',
+        _itemType.slotPositions[6] ? 'true' : 'false',
+        _itemType.slotPositions[7] ? 'true' : 'false',
+        _itemType.slotPositions[8] ? 'true' : 'false',
+        _itemType.slotPositions[9] ? 'true' : 'false',
+        _itemType.slotPositions[10] ? 'true' : 'false',
+        _itemType.slotPositions[11] ? 'true' : 'false'
+      ]);
     }
+
+    setOwnersSchematicAmount(from, to, rarity, amount);
+
+    const itemFrom = loadOrCreateItem(id, ForgeTypes.Schematic, from);
+    itemFrom.category = category;
+    itemFrom.amount = itemFrom.amount.minus(amount);
+    itemFrom.owner = from;
+    itemFrom.rarity = rarity;
+    itemFrom.slot = slot;
+    itemFrom.save();
+
+    const itemTo = loadOrCreateItem(id, ForgeTypes.Schematic, to);
+    itemTo.category = category;
+    itemTo.amount = itemTo.amount.plus(amount);
+    itemTo.owner = to;
+    itemTo.rarity = rarity;
+    itemFrom.slot = slot;
+    itemTo.save();
   } else {
-    result = 'unknown';
+    log.error('response reverted! ID:{}', [id.toString()]);
+  }
+}
+
+// @ts-ignore
+function getSchematicRarity(rarityScoreModifier: i32): string {
+  if (rarityScoreModifier == COMMON_SCORE) {
+    return COMMON_RARITY;
+  } else if (rarityScoreModifier == UNCOMMON_SCORE) {
+    return UNCOMMON_RARITY;
+  } else if (rarityScoreModifier == RARE_SCORE) {
+    return RARE_RARITY;
+  } else if (rarityScoreModifier == LEGENDARY_SCORE) {
+    return LEGENDARY_RARITY;
+  } else if (rarityScoreModifier == MYTHICAL_SCORE) {
+    return MYTHICAL_RARITY;
+  } else if (rarityScoreModifier == GODLIKE_SCORE) {
+    return GODLIKE_RARITY;
+  } else {
+    return 'unknown';
+  }
+}
+
+// @ts-ignore
+function getSchematicSlots(rarityScoreModifier: boolean[]): string {
+  let result = '';
+
+  for (let index = 0; index < WEARABLE_SLOTS.length; ++index) {
+    if (rarityScoreModifier[index]) {
+      result = result.length > 0 ? result + ', ' + WEARABLE_SLOTS[index] : WEARABLE_SLOTS[index];
+    }
   }
 
   return result;

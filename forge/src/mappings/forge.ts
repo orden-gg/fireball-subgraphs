@@ -9,12 +9,15 @@ import {
   updateSchematicTransfer
 } from '../helpers';
 import { ALLOY, ESSENCE } from '../constants';
+import { log } from '@graphprotocol/graph-ts';
 
 export function handleTransferSingle(event: TransferSingle): void {
   const amount = event.params.value;
   const id = event.params.id.toI32();
   const from = event.params.from;
   const to = event.params.to;
+
+  // log.error('Transfer item ID: {}', [id.toString()]);
 
   if (id == ALLOY) {
     updateAlloyTransfer(id, amount, from, to);
@@ -24,8 +27,10 @@ export function handleTransferSingle(event: TransferSingle): void {
     updateGeodeTransfer(id, amount, from, to);
   } else if (isCore(id)) {
     updateCoreTransfer(id, amount, from, to);
-  } else {
+  } else if (id < ALLOY) {
     updateSchematicTransfer(id, amount, from, to);
+  } else {
+    // log.error('some weird ID:{}', [id.toString()]);
   }
 }
 
@@ -45,8 +50,10 @@ export function handleTransferBatch(event: TransferBatch): void {
       updateGeodeTransfer(id, amount, from, to);
     } else if (isCore(id)) {
       updateCoreTransfer(id, amount, from, to);
-    } else {
+    } else if (id < ALLOY) {
       updateSchematicTransfer(id, amount, from, to);
+    } else {
+      // log.error('some weird ID:{}', [id.toString()]);
     }
   }
 }

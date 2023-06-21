@@ -52,15 +52,6 @@ export function updateAlloyTransfer(id: i32, amount: BigInt, from: Address, to: 
   itemTo.amount = itemTo.amount.plus(amount);
   itemTo.owner = to;
   itemTo.save();
-
-  log.error(
-    `
-    id: {},
-    category: {},
-    amount: {}
-  `,
-    [id.toString(), category.toString(), amount.toString()]
-  );
 }
 
 // @ts-ignore
@@ -86,15 +77,6 @@ export function updateEssenceTransfer(id: i32, amount: BigInt, from: Address, to
   itemTo.amount = itemTo.amount.plus(amount);
   itemTo.owner = to;
   itemTo.save();
-
-  log.error(
-    `
-    id: {},
-    category: {},
-    amount: {}
-  `,
-    [id.toString(), category.toString(), amount.toString()]
-  );
 }
 
 // @ts-ignore

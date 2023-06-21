@@ -1,15 +1,7 @@
-import { BigInt } from '@graphprotocol/graph-ts';
-
-export const WEARABLES_SLOTS = 6;
-export const WEARABLES_RARITIES = 6;
-
 export const WEARABLE_GAP_OFFSET = 1000000000;
 
 export const ALLOY = WEARABLE_GAP_OFFSET + 0;
 export const ESSENCE = WEARABLE_GAP_OFFSET + 1;
-
-export const GEODE_INDEX_START = WEARABLE_GAP_OFFSET + 2;
-export const GEODE_INDEX_END = WEARABLE_GAP_OFFSET + 7;
 
 export const GEODE_COMMON = WEARABLE_GAP_OFFSET + 2;
 export const GEODE_UNCOMMON = WEARABLE_GAP_OFFSET + 3;
@@ -18,8 +10,8 @@ export const GEODE_LEGENDARY = WEARABLE_GAP_OFFSET + 5;
 export const GEODE_MYTHICAL = WEARABLE_GAP_OFFSET + 6;
 export const GEODE_GODLIKE = WEARABLE_GAP_OFFSET + 7;
 
-export const CORE_INDEX_START = WEARABLE_GAP_OFFSET + 8;
-export const CORE_INDEX_END = WEARABLE_GAP_OFFSET + 43;
+export const GEODE_INDEX_START = GEODE_COMMON;
+export const GEODE_INDEX_END = GEODE_GODLIKE;
 
 export const CORE_BODY_COMMON = WEARABLE_GAP_OFFSET + 8;
 export const CORE_BODY_UNCOMMON = WEARABLE_GAP_OFFSET + 9;
@@ -63,6 +55,9 @@ export const CORE_PET_LEGENDARY = WEARABLE_GAP_OFFSET + 41;
 export const CORE_PET_MYTHICAL = WEARABLE_GAP_OFFSET + 42;
 export const CORE_PET_GODLIKE = WEARABLE_GAP_OFFSET + 43;
 
+export const CORE_INDEX_START = CORE_BODY_COMMON;
+export const CORE_INDEX_END = CORE_PET_GODLIKE;
+
 export const ALLOY_CATEGORY = 'alloy';
 export const CORE_CATEGORY = 'core';
 export const ESSENCE_CATEGORY = 'essence';
@@ -81,6 +76,7 @@ export const FACE_SLOT = 'face';
 export const EYES_SLOT = 'eyes';
 export const HEAD_SLOT = 'head';
 export const HANDS_SLOT = 'hands';
+export const PET_SLOT = 'pet';
 
 export const COMMON_SCORE = 1;
 export const UNCOMMON_SCORE = 2;
@@ -88,3 +84,5 @@ export const RARE_SCORE = 5;
 export const LEGENDARY_SCORE = 10;
 export const MYTHICAL_SCORE = 20;
 export const GODLIKE_SCORE = 50;
+
+export const WEARABLE_SLOTS: string[] = ['Body', 'Face', 'Eyes', 'Head', 'R Hand', 'L Hand', 'Pet', 'Background'];
