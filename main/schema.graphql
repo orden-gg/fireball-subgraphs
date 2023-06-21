@@ -56,10 +56,10 @@ type Gotchi @entity {
   hauntId: BigInt!
   identity: Identity!
   equippedWearables: [Int!]!
+  escrow: Escrow!
   # status: BigInt!
 
   lending: BigInt
-
 }
 
 type Identity @entity {
@@ -99,4 +99,9 @@ type ERC1155Item @entity {
   category: Int!
   equipped: Int!
   equippedGotchis: [Int!]!
+}
+
+type Escrow @entity {
+  id: ID!
+  gotchi: Gotchi! @derivedFrom(field: "escrow")
 }

@@ -4,6 +4,7 @@ import {
   AavegotchiDiamond__getItemTypeResultItemType_Struct,
   BuyPortals,
   ClaimAavegotchi,
+  EquipWearables,
   GotchiLendingAdded,
   GotchiLendingCanceled,
   GotchiLendingEnded,
@@ -34,7 +35,9 @@ import {
   switchEquippedItems,
   getEquipedIds,
   removeGotchiId,
-  addGotchiId
+  addGotchiId,
+  updateTransferBatch,
+  updateTransferSingle
 } from '../helpers';
 import {
   addBorrowedGotchi,
@@ -213,8 +216,8 @@ export function handleSpendSkillpoints(event: SpendSkillpoints): void {
 
 export function handleTransfer(event: Transfer): void {
   const id = event.params._tokenId;
-  let oldOwner = loadOrCreatePlayer(event.params._from);
-  let newOwner = loadOrCreatePlayer(event.params._to);
+  const oldOwner = loadOrCreatePlayer(event.params._from);
+  const newOwner = loadOrCreatePlayer(event.params._to);
   const portal = loadOrCreatePortal(id, false);
   let gotchi = loadOrCreateGotchi(id, false);
 
@@ -235,24 +238,26 @@ export function handleTransfer(event: Transfer): void {
     }
 
     if (!gotchi.lending) {
-      // @ts-ignore
-      switchEquippedItems(
-        gotchi.equippedWearables,
-        BigInt.fromString(gotchi.id).toI32(),
-        event.params._from,
-        event.params._to,
-        event
-      );
+      const itemsIds = getEquipedIds(gotchi.equippedWearables);
+      const itemsAmount = itemsIds.length;
 
-      oldOwner = loadOrCreatePlayer(event.params._from);
-      newOwner = loadOrCreatePlayer(event.params._to);
+      if (itemsAmount > 0) {
+        const vp = switchEquippedItems(
+          itemsIds,
+          BigInt.fromString(gotchi.id).toI32(),
+          event.params._from,
+          event.params._to,
+          event
+        );
+
+        oldOwner.itemsAmount = oldOwner.itemsAmount - itemsAmount;
+        newOwner.itemsAmount = newOwner.itemsAmount + itemsAmount;
+
+        oldOwner.itemsVP = oldOwner.itemsVP.minus(vp);
+        newOwner.itemsVP = newOwner.itemsVP.plus(vp);
+      }
 
       gotchi.originalOwner = newOwner.id;
-
-      const itemsAmount = getEquipedIds(gotchi.equippedWearables).length;
-
-      oldOwner.itemsAmount = oldOwner.itemsAmount - itemsAmount;
-      newOwner.itemsAmount = newOwner.itemsAmount + itemsAmount;
 
       oldOwner.gotchisOriginalOwnedAmount = oldOwner.gotchisOriginalOwnedAmount - 1;
       newOwner.gotchisOriginalOwnedAmount = newOwner.gotchisOriginalOwnedAmount + 1;
@@ -306,114 +311,11 @@ export function handleXingyun(event: Xingyun): void {
 
 // ITEM HENDLERS
 export function handleTransferSingle(event: TransferSingle): void {
-  const contract = AavegotchiDiamond.bind(event.address);
-  const _itemType = contract.getItemType(event.params._id);
-
-  if (_itemType.category == ERC1155ItemCategoty.Badge) {
-    log.error('BADGE {}', [event.params._id.toString()]);
-  } else {
-    const oldOwner = loadOrCreatePlayer(event.params._from);
-    const newOwner = loadOrCreatePlayer(event.params._to);
-
-    const itemsVP = event.params._value.times(_itemType.ghstPrice);
-
-    oldOwner.itemsVP = oldOwner.itemsVP.minus(itemsVP);
-    newOwner.itemsVP = newOwner.itemsVP.plus(itemsVP);
-
-    const wearableFrom = loadOrCreateItem(event.params._id, event.params._from, _itemType.category);
-    const wearableTo = loadOrCreateItem(event.params._id, event.params._to, _itemType.category);
-
-    const amount = event.params._value.toI32();
-
-    wearableFrom.amount = wearableFrom.amount - amount;
-    wearableTo.amount = wearableTo.amount + amount;
-    wearableFrom.save();
-    wearableTo.save();
-
-    log.error(
-      `
-      From Event: {},
-      Category: {}, 
-      itemID: {}, 
-      amount: {}, 
-      from was/has: {},
-      to was/has: {}
-    `,
-      [
-        'handleTransferSingle',
-        _itemType.category.toString(),
-        event.params._id.toString(),
-        amount.toString(),
-        `${oldOwner.itemsAmount}/${oldOwner.itemsAmount - amount}`,
-        `${newOwner.itemsAmount}/${newOwner.itemsAmount + amount}`
-      ]
-    );
-
-    oldOwner.itemsAmount = oldOwner.itemsAmount - amount;
-    newOwner.itemsAmount = newOwner.itemsAmount + amount;
-    oldOwner.save();
-    newOwner.save();
-  }
+  updateTransferSingle(event.params._from, event.params._to, event.params._id, event.params._value);
 }
 
 export function handleTransferBatch(event: TransferBatch): void {
-  const contract = AavegotchiDiamond.bind(event.address);
-  const oldOwner = loadOrCreatePlayer(event.params._from);
-  const newOwner = loadOrCreatePlayer(event.params._to);
-  let transferedAmount = 0;
-
-  for (let i = 0; i < event.params._ids.length; i++) {
-    const _itemType = contract.getItemType(event.params._ids[i]);
-
-    if (_itemType.category == ERC1155ItemCategoty.Badge) {
-      log.warning('BADGE {}', [event.params._ids[i].toString()]);
-    } else {
-      const wearableFrom = loadOrCreateItem(event.params._ids[i], event.params._from, _itemType.category);
-      const wearableTo = loadOrCreateItem(event.params._ids[i], event.params._to, _itemType.category);
-
-      const itemsVP = event.params._values[i].times(_itemType.ghstPrice);
-
-      oldOwner.itemsVP = oldOwner.itemsVP.minus(itemsVP);
-      newOwner.itemsVP = newOwner.itemsVP.plus(itemsVP);
-
-      const amount = event.params._values[i].toI32();
-
-      log.error(
-        `
-          From Event: {},
-          Category: {}, 
-          itemID: {}, 
-          amount: {}, 
-          from was/has: {},
-          to was/has: {},
-          from address: {}
-        `,
-        [
-          'handleTransferBatch',
-          _itemType.category.toString(),
-          event.params._ids[i].toString(),
-          amount.toString(),
-          `${oldOwner.itemsAmount}/${oldOwner.itemsAmount - amount}`,
-          `${newOwner.itemsAmount}/${newOwner.itemsAmount + amount}`,
-          event.params._from.toHexString()
-        ]
-      );
-
-      wearableFrom.amount = wearableFrom.amount - amount;
-      wearableTo.amount = wearableTo.amount + amount;
-
-      transferedAmount = transferedAmount + amount;
-
-      wearableFrom.save();
-      wearableTo.save();
-    }
-  }
-
-  oldOwner.itemsAmount = oldOwner.itemsAmount - transferedAmount;
-  newOwner.itemsAmount = newOwner.itemsAmount + transferedAmount;
-
-  oldOwner.save();
-  newOwner.save();
+  updateTransferBatch(event.params._from, event.params._to, event.params._ids, event.params._values);
 }
 
 export function handleTransferFromParent(event: TransferFromParent): void {
@@ -485,12 +387,20 @@ export function handleTransferToParent(event: TransferToParent): void {
   }
 }
 
-// LENDING HENDLERS
-export function handleGotchiLendingAdded(event: GotchiLendingAdded): void {
-  const gotchi = updateGotchiLending(event.params.listingId, event.params.tokenId, event.params.lender, true, event);
+export function handleEquipWearables(event: EquipWearables): void {
+  let gotchi = loadOrCreateGotchi(event.params._tokenId)!;
+
+  gotchi = updateGotchiInfo(gotchi, event.params._tokenId, event);
 
   gotchi.save();
 }
+
+// LENDING HENDLERS
+// export function handleGotchiLendingAdded(event: GotchiLendingAdded): void {
+//   const gotchi = updateGotchiLending(event.params.listingId, event.params.tokenId, event.params.lender, true, event);
+
+//   gotchi.save();
+// }
 
 export function handleGotchiLendingExecuted(event: GotchiLendingExecuted): void {
   if (event.block.number.le(BLOCK_DISABLE_OLD_LENDING_EVENTS)) {
@@ -515,11 +425,11 @@ export function handleGotchiLendingExecuted(event: GotchiLendingExecuted): void 
   gotchi.save();
 }
 
-export function handleGotchiLendingCanceled(event: GotchiLendingCanceled): void {
-  const gotchi = updateGotchiLending(event.params.listingId, event.params.tokenId, event.params.lender, false, event);
+// export function handleGotchiLendingCanceled(event: GotchiLendingCanceled): void {
+//   const gotchi = updateGotchiLending(event.params.listingId, event.params.tokenId, event.params.lender, false, event);
 
-  gotchi.save();
-}
+//   gotchi.save();
+// }
 
 export function handleGotchiLendingEnded(event: GotchiLendingEnded): void {
   if (event.block.number.le(BLOCK_DISABLE_OLD_LENDING_EVENTS)) {

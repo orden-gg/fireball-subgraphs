@@ -323,5 +323,30 @@
     ],
     "name": "TransferBatch",
     "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint16[16]",
+        "name": "_oldWearables",
+        "type": "uint16[16]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint16[16]",
+        "name": "_newWearables",
+        "type": "uint16[16]"
+      }
+    ],
+    "name": "EquipWearables",
+    "type": "event"
   }
 ]

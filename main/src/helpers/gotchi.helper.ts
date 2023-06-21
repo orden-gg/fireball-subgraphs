@@ -1,6 +1,6 @@
 import { BigInt, ethereum, log } from '@graphprotocol/graph-ts';
 import { AavegotchiDiamond } from '../../generated/AavegotchiDiamond/AavegotchiDiamond';
-import { AavegotchiOption, Gotchi } from '../../generated/schema';
+import { AavegotchiOption, Escrow, Gotchi } from '../../generated/schema';
 import { loadOrCreatePlayer } from './player.helper';
 
 export const loadOrCreateGotchi = (id: BigInt, createIfNotFound: boolean = true): Gotchi | null => {
@@ -40,8 +40,6 @@ export function updateGotchiInfo(gotchi: Gotchi, id: BigInt, event: ethereum.Eve
   const contract = AavegotchiDiamond.bind(event.address);
   const _response = contract.try_getAavegotchi(id);
 
-  log.warning('handleClaimAavegotchi {}', [id.toString()]);
-
   if (!_response.reverted) {
     const gotchiInfo = _response.value;
 
@@ -60,6 +58,10 @@ export function updateGotchiInfo(gotchi: Gotchi, id: BigInt, event: ethereum.Eve
     gotchi.modifiedRarityScore = gotchiInfo.modifiedRarityScore;
     gotchi.baseRarityScore = gotchiInfo.baseRarityScore;
     gotchi.equippedWearables = gotchiInfo.equippedWearables;
+    gotchi.escrow = gotchiInfo.escrow.toHexString();
+
+    const escrow = new Escrow(gotchiInfo.escrow.toHexString());
+    escrow.save();
   } else {
     log.warning("Aavegotchi {} couldn't be updated at block: {} tx_hash: {}", [
       id.toString(),
