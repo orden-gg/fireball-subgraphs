@@ -18,13 +18,15 @@ dataSources:
       abis:
         - name: ForgeDiamond
           file: ../abis/forge.abi.json
+        - name: MainDiamond
+          file: ../abis/aavegotchi.abi.json
       eventHandlers:
-        # - event: TransferSingle(indexed address,indexed address,indexed address,uint256,uint256)
-        #   handler: handleTransferSingle
-        # - event: TransferBatch(indexed address,indexed address,indexed address,uint256[],uint256[])
-        #   handler: handleTransferBatch
-        - event: ItemSmelted(uint256,uint256)
-          handler: handleItemSmelted
+        - event: TransferSingle(indexed address,indexed address,indexed address,uint256,uint256)
+          handler: handleTransferSingle
+        - event: TransferBatch(indexed address,indexed address,indexed address,uint256[],uint256[])
+          handler: handleTransferBatch
+        # - event: ItemSmelted(uint256,uint256)
+        #   handler: handleItemSmelted
         # - event: ItemForged(uint256,uint256)
         #   handler: handleItemForged
         # - event: ForgeQueueClaimed(uint256,uint256)

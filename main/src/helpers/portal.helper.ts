@@ -1,4 +1,4 @@
-import { BigInt, ethereum } from '@graphprotocol/graph-ts';
+import { BigInt } from '@graphprotocol/graph-ts';
 import { Portal } from '../../generated/schema';
 
 export function loadOrCreatePortal(id: BigInt, createIfNotFound: boolean = true): Portal {

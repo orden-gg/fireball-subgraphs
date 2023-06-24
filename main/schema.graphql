@@ -2,7 +2,9 @@ type Player @entity {
   "player address"
   id: ID!
 
-  portalsBought: [Portal!]! @derivedFrom(field: "buyer")
+  gotchisVP: BigInt!
+  itemsVP: BigInt!
+  portalsVP: BigInt!
 
   portalsOwned: [Portal!]! @derivedFrom(field: "owner")
   portalsAmount: Int!
@@ -11,6 +13,8 @@ type Player @entity {
   gotchisOwnedAmount: Int!
 
   gotchisOriginalOwned: [Gotchi!]! @derivedFrom(field: "originalOwner")
+  # not corect amount
+  gotchisOriginalOwnedAmount: Int!
 
   gotchisLentOut: [BigInt!]!
   gotchisLentOutAmount: Int!
@@ -19,9 +23,8 @@ type Player @entity {
   gotchisBorrowedAmount: Int!
 
   items: [ERC1155Item!] @derivedFrom(field: "owner")
+  # not corect amount
   itemsAmount: Int!
-
-  # itemsAmount: Int!
 }
 
 type AavegotchiOption @entity {
@@ -45,18 +48,18 @@ type Gotchi @entity {
   portal: Portal! @derivedFrom(field: "gotchi")
   usedSkillPoints: BigInt!
   availableSkillPoints: BigInt!
+  baseRarityScore: BigInt!
+  modifiedRarityScore: BigInt!
   badges: [Int!]!
   collateral: Bytes!
   numericTraits: [Int!]!
   hauntId: BigInt!
   identity: Identity!
   equippedWearables: [Int!]!
+  escrow: Escrow!
   # status: BigInt!
 
   lending: BigInt
-
-  # Can be removed in future;
-  modifiedRarityScore: BigInt!
 }
 
 type Identity @entity {
@@ -95,4 +98,10 @@ type ERC1155Item @entity {
 
   category: Int!
   equipped: Int!
+  equippedGotchis: [Int!]!
+}
+
+type Escrow @entity {
+  id: ID!
+  gotchi: Gotchi! @derivedFrom(field: "escrow")
 }
