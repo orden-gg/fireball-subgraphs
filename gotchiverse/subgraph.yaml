@@ -74,6 +74,8 @@ dataSources:
           handler: handleEquipTile
         - event: UnequipTile(uint256,uint256,uint256,uint256)
           handler: handleUnequipTile
+        - event: ParcelAccessRightSet(uint256,uint256,uint256)
+          handler: handleParcelAccessRightSet
       file: ./src/mappings/realm.ts
   - kind: ethereum/contract
     name: InstallationDiamond

@@ -6,6 +6,7 @@ import {
   EquipTile as EquipTileEvent,
   InstallationUpgraded as InstallationUpgradedEvent,
   MintParcel as MinParcelEvent,
+  ParcelAccessRightSet as ParcelAccessRightSetEvent,
   SurveyingRoundProgressed as SurveyingRoundProgressedEvent,
   SurveyParcel as SurveyParcelEvent,
   Transfer as TransferEvent,
@@ -13,6 +14,8 @@ import {
   UnequipTile as UnequipTileEvent
 } from '../../generated/RealmDiamond/RealmDiamond';
 import {
+  createChannelAlchemicaEvent,
+  createClaimAlchemicaEvent,
   equipInstallation,
   equipTile,
   getParcelVPBySize,
@@ -20,6 +23,7 @@ import {
   loadOrCreateGotchi,
   loadOrCreateInstallation,
   loadOrCreateParcel,
+  loadOrCreateParcelAccessRight,
   loadOrCreatePlayer,
   loadOrCreateSurvey,
   loadOrCreateTile,
@@ -35,25 +39,40 @@ import { AlchemicaTypes } from '../shared/enums';
 export function handleChannelAlchemica(event: ChannelAlchemicaEvent): void {
   const parcel = loadOrCreateParcel(event.params._realmId);
   const gotchi = loadOrCreateGotchi(event.params._gotchiId);
+  const channelEvent = createChannelAlchemicaEvent(event);
 
   parcel.lastChanneled = event.block.timestamp.toI32();
   gotchi.lastChanneled = event.block.timestamp.toI32();
 
+  if (parcel.owner) {
+    channelEvent.realmOwner = parcel.owner;
+  }
+
   parcel.save();
   gotchi.save();
+  channelEvent.save();
 }
 
 export function handleAlchemicaClaimed(event: AlchemicaClaimedEvent): void {
   const type = event.params._alchemicaType.toI32();
   const parcel = loadOrCreateParcel(event.params._realmId);
+  const gotchi = loadOrCreateGotchi(event.params._gotchiId);
+  const claimEvent = createClaimAlchemicaEvent(event);
   const alchemica = parcel.alchemica;
 
   alchemica[type] = alchemica[type].minus(event.params._amount);
 
   parcel.lastClaimed = event.block.timestamp.toU32();
   parcel.alchemica = alchemica;
+  gotchi.lastClaimed = event.block.timestamp.toU32();
+
+  if (parcel.owner) {
+    claimEvent.realmOwner = parcel.owner;
+  }
 
   parcel.save();
+  gotchi.save();
+  claimEvent.save();
 }
 
 export function handleMintParcel(event: MinParcelEvent): void {
@@ -212,4 +231,13 @@ export function handleUnequipTile(event: UnequipTileEvent): void {
   tile.equipped = false;
   tile.parcel = null;
   tile.save();
+}
+
+export function handleParcelAccessRightSet(event: ParcelAccessRightSetEvent): void {
+  let parcel = loadOrCreateParcel(event.params._realmId);
+  parcel.save();
+
+  let accessRight = loadOrCreateParcelAccessRight(event.params._realmId, event.params._actionRight);
+  accessRight.accessRight = event.params._accessRight.toI32();
+  accessRight.save();
 }

@@ -1,6 +1,6 @@
 import { BigInt, dataSource, log } from '@graphprotocol/graph-ts';
 import { RealmDiamond } from '../../generated/RealmDiamond/RealmDiamond';
-import { Parcel } from '../../generated/schema';
+import { Parcel, ParcelAccessRight } from '../../generated/schema';
 import { AlchemicaTypes, HAMBLE_VP, PARTNER_VP, ParcelTypes, REASONABLE_VP, SPACIOUS_VP } from '../shared';
 
 export const loadOrCreateParcel = (realmId: BigInt): Parcel => {
@@ -59,19 +59,30 @@ export const increaseCurrentSurvey = (alchemica: BigInt[], alchemicas: BigInt[])
   return currentAlchemica;
 };
 
-
 export function getParcelVPBySize(size: BigInt): BigInt {
-
   switch (size.toI32()) {
     case ParcelTypes.Humble:
-      return BigInt.fromI32(HAMBLE_VP)
-    case ParcelTypes.Reasonable: 
-      return BigInt.fromI32(REASONABLE_VP)
-    case ParcelTypes.SpaciousH || ParcelTypes.SpaciousV: 
-      return BigInt.fromI32(SPACIOUS_VP)
-    case ParcelTypes.Partner || ParcelTypes.Guardian: 
-      return BigInt.fromI32(PARTNER_VP)
+      return BigInt.fromI32(HAMBLE_VP);
+    case ParcelTypes.Reasonable:
+      return BigInt.fromI32(REASONABLE_VP);
+    case ParcelTypes.SpaciousH || ParcelTypes.SpaciousV:
+      return BigInt.fromI32(SPACIOUS_VP);
+    case ParcelTypes.Partner || ParcelTypes.Guardian:
+      return BigInt.fromI32(PARTNER_VP);
     default:
       return BigInt.zero();
   }
 }
+
+export const loadOrCreateParcelAccessRight = (realmId: BigInt, actionRight: BigInt): ParcelAccessRight => {
+  const id = realmId.toString() + '-' + actionRight.toString();
+  let accessRight = ParcelAccessRight.load(id);
+
+  if (!accessRight) {
+    accessRight = new ParcelAccessRight(id);
+    accessRight.actionRight = actionRight.toI32();
+    accessRight.parcel = realmId.toString();
+  }
+
+  return accessRight;
+};

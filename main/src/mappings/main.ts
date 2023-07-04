@@ -396,11 +396,11 @@ export function handleEquipWearables(event: EquipWearables): void {
 }
 
 // LENDING HENDLERS
-// export function handleGotchiLendingAdded(event: GotchiLendingAdded): void {
-//   const gotchi = updateGotchiLending(event.params.listingId, event.params.tokenId, event.params.lender, true, event);
+export function handleGotchiLendingAdded(event: GotchiLendingAdded): void {
+  const gotchi = updateGotchiLending(event.params.listingId, event.params.tokenId, event.params.lender, true);
 
-//   gotchi.save();
-// }
+  gotchi.save();
+}
 
 export function handleGotchiLendingExecuted(event: GotchiLendingExecuted): void {
   if (event.block.number.le(BLOCK_DISABLE_OLD_LENDING_EVENTS)) {
@@ -425,11 +425,11 @@ export function handleGotchiLendingExecuted(event: GotchiLendingExecuted): void 
   gotchi.save();
 }
 
-// export function handleGotchiLendingCanceled(event: GotchiLendingCanceled): void {
-//   const gotchi = updateGotchiLending(event.params.listingId, event.params.tokenId, event.params.lender, false, event);
+export function handleGotchiLendingCanceled(event: GotchiLendingCanceled): void {
+  const gotchi = updateGotchiLending(event.params.listingId, event.params.tokenId, event.params.lender, false);
 
-//   gotchi.save();
-// }
+  gotchi.save();
+}
 
 export function handleGotchiLendingEnded(event: GotchiLendingEnded): void {
   if (event.block.number.le(BLOCK_DISABLE_OLD_LENDING_EVENTS)) {

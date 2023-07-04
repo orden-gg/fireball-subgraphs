@@ -1,3 +1,5 @@
+export * from './channel.helper';
+export * from './claim.helper';
 export * from './gotchi.helper';
 export * from './installation.helper';
 export * from './parcel.helper';

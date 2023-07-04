@@ -37,11 +37,24 @@ type Parcel @entity {
   installations: [Installation!]!
   tiles: [Tile!]!
 
+  accessRights: [ParcelAccessRight!]! @derivedFrom(field: "parcel")
+  channelHistory: [ChannelAlchemicaEvent!]! @derivedFrom(field: "parcel")
+  claimHistory: [ClaimAlchemicaEvent!]! @derivedFrom(field: "parcel")
+
   auctionId: String
   timesTraded: BigInt!
   historicalPrices: [BigInt!]
   listings: [ERC721Listing!] @derivedFrom(field: "parcel")
   activeListing: BigInt
+}
+
+type ParcelAccessRight @entity {
+  id: ID!
+  parcel: Parcel!
+
+  whitelistId: Int
+  accessRight: Int!
+  actionRight: Int!
 }
 
 type Survey @entity {
@@ -82,7 +95,10 @@ type Tile @entity {
 
 type Gotchi @entity {
   id: ID!
-  lastChanneled: Int!
+  lastChanneled: Int
+  lastClaimed: Int
+  channelHistory: [ChannelAlchemicaEvent!]! @derivedFrom(field: "gotchi")
+  claimHistory: [ClaimAlchemicaEvent!]! @derivedFrom(field: "gotchi")
 }
 
 type ERC721Listing @entity {
@@ -113,4 +129,51 @@ type ERC721Listing @entity {
   amountEquippedWearables: Int
   soldBefore: Boolean
   claimedAt: BigInt
+}
+
+type ChannelAlchemicaEvent @entity {
+  id: ID!
+
+  gotchi: Gotchi!
+  parcel: Parcel!
+
+  realmId: BigInt!
+  gotchiId: BigInt!
+
+  "address of the realm owner"
+  realmOwner: String
+  "address who performed an event"
+  eventExecuter: Bytes!
+
+  alchemica: [BigInt!]!
+  spilloverRadius: BigInt!
+  spilloverRate: BigInt!
+
+  block: BigInt!
+  transaction: Bytes!
+  timestamp: BigInt!
+}
+
+type ClaimAlchemicaEvent @entity {
+  id: ID!
+
+  gotchi: Gotchi!
+  parcel: Parcel!
+
+  realmId: BigInt!
+  gotchiId: BigInt!
+
+  "address of the realm owner"
+  realmOwner: String
+  "address who performed an event"
+  eventExecuter: Bytes!
+
+  alchemicaType: BigInt!
+  amount: BigInt!
+  spilloverRadius: BigInt!
+  spilloverRate: BigInt!
+
+  block: BigInt!
+  transaction: Bytes!
+  timestamp: BigInt!
 }

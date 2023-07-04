@@ -7,15 +7,14 @@ export function updateGotchiLending(
   listingId: BigInt,
   tokenId: BigInt,
   lenderAddress: Address,
-  isSetLending: boolean,
-  event: ethereum.Event
+  isSetLending: boolean
 ): Gotchi {
   let gotchi = loadOrCreateGotchi(tokenId)!;
 
-  if (!gotchi.modifiedRarityScore) {
-    log.warning('modifiedRarityScore {}', ['not found']);
-    gotchi = updateGotchiInfo(gotchi, tokenId, event);
-  }
+  // if (!gotchi.modifiedRarityScore) {
+  //   log.warning('modifiedRarityScore {}', ['not found']);
+  //   gotchi = updateGotchiInfo(gotchi, tokenId, event);
+  // }
 
   if (isSetLending) {
     gotchi.lending = listingId;
