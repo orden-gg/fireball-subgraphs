@@ -28,6 +28,7 @@
     "deploy:verse:stage": "cd gotchiverse && graph deploy --product hosted-service dudendy/gotchiverse",
     "deploy:verse:prod": "cd gotchiverse && graph deploy --product hosted-service orden-gg/gotchiverse",
     "deploy:forge:stage": "cd forge && graph deploy --product hosted-service dudendy/forge",
+    "deploy:forge:prod": "cd forge && graph deploy --product hosted-service orden-gg/gotchi-forge",
     "clean": "rm -rf node_modules"
   }
 }
